@@ -1,0 +1,481 @@
+---
+import { getCollection } from "astro:content";
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
+import { getSortedPosts } from "@utils/content-utils";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
+import { githubHeatmapConfig, homePageConfig, profileConfig } from "@/config";
+
+// 获取最近的文章
+const sortedPosts = await getSortedPosts();
+const recentPosts = Array.isArray(sortedPosts) ? sortedPosts.slice(0, 3) : [];
+
+// 获取最近的项目
+const projectEntries = await getCollection("projects", ({ data }) => {
+	return data.draft !== true;
+});
+const recentProjects = projectEntries
+	.sort((a, b) => b.data.lastUpdate.getTime() - a.data.lastUpdate.getTime())
+	.slice(0, 2)
+	.map((entry) => ({
+		title: entry.data.title,
+		description: entry.data.description,
+		technologies: entry.data.technologies,
+		url: entry.data.url,
+		slug: entry.slug,
+	}));
+
+// 月份名称
+const MONTHS = [
+	"Jan",
+	"Feb",
+	"Mar",
+	"Apr",
+	"May",
+	"Jun",
+	"Jul",
+	"Aug",
+	"Sep",
+	"Oct",
+	"Nov",
+	"Dec",
+];
+
+// 生成提示信息
+function getTooltip(day: any, date: Date) {
+	const dateStr = date.toISOString().split("T")[0];
+	switch (day.commits) {
+		case 0:
+			return `No contributions on ${dateStr}`;
+		case 1:
+			return `1 contribution on ${dateStr}`;
+		default:
+			return `${day.commits} contributions on ${dateStr}`;
+	}
+}
+
+// GitHub API数据获取函数
+async function fetchGitHubContributions() {
+	const config = githubHeatmapConfig;
+	const { username } = config;
+	const { token, timeout } = config.data.githubApi;
+
+	try {
+		const query = `
+      query($username: String!) {
+        user(login: $username) {
+          contributionsCollection {
+            contributionCalendar {
+              totalContributions
+              weeks {
+                contributionDays {
+                  contributionCount
+                  date
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+
+		if (token) {
+			headers["Authorization"] = `Bearer ${token}`;
+		}
+
+		const response = await fetch("https://api.github.com/graphql", {
+			method: "POST",
+			headers,
+			body: JSON.stringify({
+				query,
+				variables: { username },
+			}),
+			signal: AbortSignal.timeout(timeout),
+		});
+
+		if (!response.ok) {
+			throw new Error(`GitHub API error: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		if (data.errors) {
+			throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
+		}
+
+		const contributionDays =
+			data.data.user.contributionsCollection.contributionCalendar.weeks.flatMap(
+				(week: any) => week.contributionDays,
+			);
+
+		// 转换为热力图数据格式
+		return contributionDays.map((day: any) => {
+			const contributionCount = day.contributionCount;
+			let intensity = 0;
+
+			// 根据贡献数量计算强度级别
+			if (contributionCount === 0) intensity = 0;
+			else if (contributionCount <= 3) intensity = 1;
+			else if (contributionCount <= 6) intensity = 2;
+			else if (contributionCount <= 9) intensity = 3;
+			else intensity = 4;
+
+			return {
+				date: day.date,
+				intensity,
+				commits: contributionCount,
+			};
+		});
+	} catch (error) {
+		console.warn(
+			"Failed to fetch GitHub contributions, falling back to mock data:",
+			error,
+		);
+		return null;
+	}
+}
+
+// 生成模拟数据的函数（作为降级方案）
+function generateMockData() {
+	const config = githubHeatmapConfig;
+	const { days } = config.style.grid;
+	const { intensityWeights, weekdayBoost, weekendBoost, seasonalPattern } =
+		config.data.mockData.generatePattern;
+
+	const data = [];
+	const today = new Date();
+
+	for (let i = 0; i < days; i++) {
+		const date = new Date(today);
+		date.setDate(date.getDate() - (days - 1 - i));
+
+		const dayOfWeek = date.getDay();
+		const month = date.getMonth();
+
+		let baseIntensity = Math.random();
+
+		let intensity = 0;
+		let cumulative = 0;
+		for (let j = 0; j < intensityWeights.length; j++) {
+			cumulative += intensityWeights[j];
+			if (baseIntensity <= cumulative) {
+				intensity = j;
+				break;
+			}
+		}
+
+		const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+		const dayBoost = isWeekend ? weekendBoost : weekdayBoost;
+		const seasonBoost = seasonalPattern[month];
+		const finalIntensity = Math.min(
+			4,
+			Math.floor(intensity * dayBoost * seasonBoost),
+		);
+
+		data.push({
+			date: date.toISOString().split("T")[0],
+			intensity: finalIntensity,
+			commits:
+				finalIntensity === 0
+					? 0
+					: Math.floor(Math.random() * 5) + finalIntensity,
+		});
+	}
+
+	return data;
+}
+
+// 生成月份标签
+function generateMonthLabels(contributions: any[]) {
+	const firstDate = new Date(contributions[0].date);
+	const startRow = firstDate.getDay();
+	const months: Array<{ name: string; gridColumn: number; key: number }> = [];
+	let latestMonth = -1;
+
+	contributions.forEach((c: any, i: number) => {
+		const date = new Date(c.date);
+		const month = date.getMonth();
+
+		// 在星期天的月份出现变化的列上面显示月份
+		if (date.getDay() === 0 && month !== latestMonth) {
+			// 计算月份对应的列，从 1 开始、左上角格子留空所以 +2
+			const gridColumn = 2 + Math.floor((i + startRow) / 7);
+			latestMonth = month;
+			months.push({
+				name: MONTHS[month],
+				gridColumn: gridColumn,
+				key: i,
+			});
+		}
+	});
+
+	// 处理边界情况
+	if (months.length > 0) {
+		// 如果第一格不是周日，则首月可能跑到第二列，需要再检查下
+		if (MONTHS[firstDate.getMonth()] === months[0].name) {
+			months[0].gridColumn = 2;
+		}
+
+		// 第一个月可能跟第二个重叠，此时隐藏第一个
+		if (months.length > 1 && months[1].gridColumn - months[0].gridColumn < 3) {
+			months.shift();
+		}
+
+		// 如果最后一个月在最后一格，则会超出布局范围，故隐藏
+		if (months[months.length - 1].gridColumn > 53) {
+			months.pop();
+		}
+	}
+
+	return months;
+}
+
+// 根据配置选择数据源
+let heatmapData: any[];
+if (githubHeatmapConfig.data.source === "github-api") {
+	const apiData = await fetchGitHubContributions();
+	if (apiData) {
+		heatmapData = apiData;
+	} else {
+		console.log("Using mock data as fallback");
+		heatmapData = generateMockData();
+	}
+} else {
+	heatmapData = generateMockData();
+}
+
+if (!heatmapData || heatmapData.length === 0) {
+	console.error("No heatmap data available, generating emergency mock data");
+	heatmapData = generateMockData();
+}
+
+const totalCommits = heatmapData.reduce(
+	(sum: number, day: any) => sum + day.commits,
+	0,
+);
+const monthLabels = generateMonthLabels(heatmapData);
+const firstDate = new Date(heatmapData[0].date);
+const startRow = firstDate.getDay();
+---
+
+<!-- 主内容区域 - 居中对齐的长方形区域 -->
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-8">
+  <!-- 个人资料卡片 -->
+  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+    <div class="text-left mb-6">
+      <div class="relative inline-block mb-4">
+        <ImageWrapper
+          src={profileConfig.avatar || ""}
+          alt="Avatar"
+          class="w-32 h-32 rounded-full object-cover ring-4 ring-[var(--primary)]/20 shadow-lg"
+        />
+        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-[var(--card-bg)]"></div>
+      </div>
+      <h1 class="text-xl font-bold text-[var(--primary)] mb-2">
+        Hello, I'm <span class="text-[var(--primary)]">{profileConfig.name}</span>
+      </h1>
+      <p class="text-75 mb-4">{profileConfig.bio}</p>
+    </div>
+
+    <!-- 社交链接 -->
+    <div class="flex justify-center space-x-3">
+      {profileConfig.links.map((link: any) => (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="w-9 h-9 bg-[var(--btn-plain-bg)] rounded-lg flex items-center justify-center hover:bg-[var(--btn-plain-bg-hover)] transition-all duration-200 hover:scale-110 transform"
+          aria-label={link.name}
+        >
+          <Icon name={link.icon} class="w-4 h-4 text-75" />
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <!-- 导航卡片 -->
+  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center mb-4">
+      <Icon name="material-symbols:explore-outline" class="w-5 h-5 mr-2 text-[var(--primary)]" />
+      <h2 class="text-lg font-semibold text-[var(--primary)]">导航</h2>
+    </div>
+    <div class="grid grid-cols-1 gap-4">
+      {homePageConfig.navigation.map((item: any) => (
+        <a
+          href={item.url}
+          class="flex items-center p-4 rounded-lg bg-[var(--btn-plain-bg)] hover:bg-[var(--btn-plain-bg-hover)] transition-all duration-200 group hover:scale-105 transform"
+        >
+          <div class="w-10 h-10 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center mr-3 group-hover:bg-[var(--primary)]/20 transition-colors duration-200">
+            <Icon name={item.icon} class="w-5 h-5 text-[var(--primary)]" />
+          </div>
+          <div class="flex-1">
+            <h3 class="font-medium text-75 group-hover:text-[var(--primary)] transition-colors duration-200">
+              {item.name}
+            </h3>
+            <p class="text-sm text-60">{item.description}</p>
+          </div>
+          <Icon name="material-symbols:arrow-forward" class="w-4 h-4 text-50 group-hover:text-[var(--primary)] transition-colors duration-200" />
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <!-- 最近文章卡片 -->
+  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center mb-4">
+      <Icon name="material-symbols:article-outline" class="w-5 h-5 mr-2 text-[var(--primary)]" />
+      <h2 class="text-lg font-semibold text-[var(--primary)]">最近文章</h2>
+    </div>
+    <div class="space-y-3">
+      {recentPosts.map((post: any) => (
+        <a
+          href={getPostUrlBySlug(post.slug)}
+          class="block p-3 rounded-lg bg-[var(--btn-plain-bg)] hover:bg-[var(--btn-plain-bg-hover)] transition-all duration-200 group"
+        >
+          <h3 class="font-medium text-75 group-hover:text-[var(--primary)] transition-colors duration-200 mb-1">
+            {post.data.title}
+          </h3>
+          <p class="text-sm text-60 line-clamp-2">{post.data.summary}</p>
+          <div class="flex items-center mt-2 text-xs text-50">
+            <Icon name="material-symbols:calendar-today-outline" class="w-3 h-3 mr-1" />
+            <time>{formatDateToYYYYMMDD(post.data.published)}</time>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div class="mt-4">
+      <a
+        href="/archive/"
+        class="inline-flex items-center text-sm text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors duration-200"
+      >
+        查看全部文章
+        <Icon name="material-symbols:arrow-forward" class="w-4 h-4 ml-1" />
+      </a>
+    </div>
+  </div>
+
+  <!-- GitHub 贡献热力图卡片 -->
+  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 col-span-1 md:col-span-2 lg:col-span-2">
+    <div class="flex items-center mb-4">
+      <Icon name="fa6-brands:github" class="w-5 h-5 mr-2 text-[var(--primary)]" />
+      <h2 class="text-lg font-semibold text-[var(--primary)]">2025年GitHub提交</h2>
+    </div>
+    <div class="bg-[var(--btn-plain-bg)] rounded-lg p-4">
+      {githubHeatmapConfig.display.showStats && (
+        <div class="text-sm text-60 mb-3">
+          <span class="font-medium">{totalCommits} contributions in 2025</span>
+          <span class="ml-2">{totalCommits} 次提交 2025年</span>
+        </div>
+      )}
+      <!-- GitHub 贡献热力图 -->
+      <div class="github-heatmap w-full">
+        <div class="relative overflow-hidden">
+          <!-- 热力图容器 -->
+          <div class="grid w-full" style="grid-template-columns: auto repeat(53, minmax(0, 1fr)); grid-template-rows: auto repeat(7, minmax(0, 1fr)); gap: 1px; max-width: 100%;">
+            
+            <!-- 月份标签 -->
+             {githubHeatmapConfig.display.showMonthLabels && monthLabels.map((month) => (
+               <span 
+                 class="text-xs text-50 text-center"
+                 style={`grid-column: ${month.gridColumn}; grid-row: 1;`}
+               >
+                 {month.name}
+               </span>
+             ))}
+            
+            <!-- 星期标签 -->
+            {githubHeatmapConfig.display.showMonthLabels && (
+              <>
+                <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 2;">Mon</span>
+                <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 4;">Wed</span>
+                <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 6;">Fri</span>
+              </>
+            )}
+            
+            <!-- 热力图网格 -->
+            {heatmapData.map((day: any, index: number) => {
+              const { light, dark } = githubHeatmapConfig.style.colorScheme;
+              const lightColor = day.intensity === 0 ? light.empty : light.levels[day.intensity - 1];
+              const darkColor = day.intensity === 0 ? dark.empty : dark.levels[day.intensity - 1];
+              const cellClasses = `${githubHeatmapConfig.style.grid.cellSize} ${githubHeatmapConfig.style.grid.cellRadius} ${lightColor} ${darkColor}`;
+              
+              const date = new Date(day.date);
+              const gridColumn = 2 + Math.floor((index + startRow) / 7);
+              const gridRow = 2 + ((index + startRow) % 7);
+              
+              const style = index === 0 ? `grid-column: ${gridColumn}; grid-row: ${2 + startRow};` : `grid-column: ${gridColumn}; grid-row: ${gridRow};`;
+              
+              return (
+                <div 
+                  class={cellClasses}
+                  style={style}
+                  title={getTooltip(day, date)}
+                ></div>
+              );
+            })}
+          </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="text-sm text-60 mt-3">
+          <span class="font-medium">{totalCommits} contributions in the last year</span>
+        </div>
+        
+        <!-- 图例 -->
+        {githubHeatmapConfig.display.showLegend && (
+          <div class="flex items-center justify-end mt-2 text-xs text-50">
+            <span class="mr-2">Less</span>
+            <div class="flex items-center space-x-1">
+              <div class={`w-1.5 h-1.5 rounded-sm ${githubHeatmapConfig.style.colorScheme.light.empty} ${githubHeatmapConfig.style.colorScheme.dark.empty}`}></div>
+              {githubHeatmapConfig.style.colorScheme.light.levels.map((lightColor, index) => {
+                const darkColor = githubHeatmapConfig.style.colorScheme.dark.levels[index];
+                return <div class={`w-1.5 h-1.5 rounded-sm ${lightColor} ${darkColor}`}></div>;
+              })}
+            </div>
+            <span class="ml-2">More</span>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <!-- 项目卡片 -->
+  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 col-span-1 md:col-span-1 lg:col-span-1">
+    <div class="flex items-center mb-4">
+      <Icon name="material-symbols:folder-open-outline" class="w-5 h-5 mr-2 text-[var(--primary)]" />
+      <h2 class="text-lg font-semibold text-[var(--primary)]">项目</h2>
+    </div>
+    <div class="space-y-3">
+      {recentProjects.map((project) => (
+        <a
+          href={`/projects/${project.slug}/`}
+          class="block p-3 rounded-lg bg-[var(--btn-plain-bg)] hover:bg-[var(--btn-plain-bg-hover)] transition-all duration-200 group"
+        >
+          <h3 class="font-medium text-75 group-hover:text-[var(--primary)] transition-colors duration-200 mb-1">
+            {project.title}
+          </h3>
+          <p class="text-sm text-60 line-clamp-2">{project.description}</p>
+          <div class="flex items-center mt-2 text-xs text-50">
+            <Icon name="material-symbols:code-blocks-outline" class="w-3 h-3 mr-1" />
+            <span>{project.technologies?.map(tech => tech.name).join(", ") || "暂无技术栈信息"}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div class="mt-4">
+      <a
+        href="/projects/"
+        class="inline-flex items-center text-sm text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors duration-200"
+      >
+        查看全部项目
+        <Icon name="material-symbols:arrow-forward" class="w-4 h-4 ml-1" />
+      </a>
+    </div>
+  </div>
+</div>

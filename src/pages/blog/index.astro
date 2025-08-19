@@ -1,0 +1,72 @@
+---
+import { getCollection } from "astro:content";
+import BlogPagination from "../../components/control/BlogPagination.astro";
+import PostCard from "../../components/PostCard.astro";
+import ProfileCard from "../../components/widget/ProfileCard.astro";
+import { PAGE_SIZE } from "../../constants/constants";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { getSortedPosts } from "../../utils/content-utils";
+
+const posts = await getSortedPosts();
+
+// 手动创建第一页的分页对象
+const totalPages = Math.ceil(posts.length / PAGE_SIZE);
+const page = {
+	data: posts.slice(0, PAGE_SIZE),
+	start: 0,
+	end: Math.min(PAGE_SIZE - 1, posts.length - 1),
+	size: PAGE_SIZE,
+	total: posts.length,
+	currentPage: 1,
+	lastPage: totalPages,
+	url: {
+		current: "/blog/",
+		next: totalPages > 1 ? "/blog/2/" : undefined,
+		prev: undefined,
+		first: "/blog/",
+		last: totalPages > 1 ? `/blog/${totalPages}/` : "/blog/",
+	},
+};
+---
+
+<MainGridLayout title="博客" description="我的博客文章">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- 主内容区域 -->
+    <div class="lg:col-span-3">
+      <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+          <div class="grid grid-cols-1 gap-4">
+            {page.data.map((post) => (
+              <PostCard 
+                entry={post}
+                title={post.data.title}
+                url={`/posts/${post.slug}/`}
+                published={post.data.published}
+                updated={post.data.updated}
+                tags={post.data.tags || []}
+                category={post.data.category || null}
+                image={post.data.image}
+                description={post.data.description}
+                draft={post.data.draft || false}
+                style=""
+              />
+            ))}
+          </div>
+          
+          {totalPages > 1 && (
+            <div class="mt-8">
+              <BlogPagination page={page} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+    
+    <!-- 侧边栏区域 -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-6 space-y-6">
+        <ProfileCard />
+      </div>
+    </div>
+  </div>
+</MainGridLayout>

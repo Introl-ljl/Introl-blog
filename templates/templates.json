@@ -1,0 +1,182 @@
+{
+  "posts": {
+    "study-note": {
+      "name": "学习笔记",
+      "description": "技术学习笔记和总结",
+      "icon": "📚",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "笔记标题" },
+        "description": { "required": false, "type": "string", "prompt": "笔记描述" },
+        "tags": { "required": false, "type": "array", "prompt": "标签 (用逗号分隔)", "default": ["学习笔记"] },
+        "category": { "required": false, "type": "string", "prompt": "分类", "default": "学习笔记" },
+        "difficulty": { "required": false, "type": "select", "prompt": "难度等级", "options": ["入门", "基础", "进阶", "高级"], "default": "基础" }
+      },
+      "template": "study-note.md"
+    },
+    "solution": {
+      "name": "题解",
+      "description": "算法题解和分析",
+      "icon": "🧩",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "题目标题 (格式: [平台][题号]-题目名称-题解)" },
+        "description": { "required": false, "type": "string", "prompt": "题解描述" },
+        "tags": { "required": false, "type": "array", "prompt": "标签 (用逗号分隔)", "default": ["题解"] },
+        "category": { "required": false, "type": "string", "prompt": "分类", "default": "题解" },
+        "platform": { "required": false, "type": "select", "prompt": "题目平台", "options": ["Codeforces", "Luogu", "AtCoder", "LeetCode", "其他"], "default": "Codeforces" },
+        "difficulty": { "required": false, "type": "select", "prompt": "题目难度", "options": ["入门", "普及-", "普及/提高-", "普及+/提高", "提高+/省选-", "省选/NOI-", "NOI/NOI+/CTSC"], "default": "普及/提高-" },
+        "algorithm": { "required": false, "type": "array", "prompt": "算法标签 (用逗号分隔)", "default": [] }
+      },
+      "template": "solution.md"
+    },
+    "tutorial": {
+      "name": "教程",
+      "description": "技术教程和指南",
+      "icon": "📖",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "教程标题" },
+        "description": { "required": false, "type": "string", "prompt": "教程描述" },
+        "tags": { "required": false, "type": "array", "prompt": "标签 (用逗号分隔)", "default": ["教程"] },
+        "category": { "required": false, "type": "string", "prompt": "分类", "default": "教程" },
+        "level": { "required": false, "type": "select", "prompt": "教程等级", "options": ["入门", "初级", "中级", "高级"], "default": "初级" },
+        "duration": { "required": false, "type": "string", "prompt": "预计学习时间", "default": "" }
+      },
+      "template": "tutorial.md"
+    },
+    "blog": {
+      "name": "博客文章",
+      "description": "一般性博客文章",
+      "icon": "✍️",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "文章标题" },
+        "description": { "required": false, "type": "string", "prompt": "文章描述" },
+        "tags": { "required": false, "type": "array", "prompt": "标签 (用逗号分隔)", "default": ["博客"] },
+        "category": { "required": false, "type": "string", "prompt": "分类", "default": "博客" }
+      },
+      "template": "blog.md"
+    },
+    "review": {
+      "name": "总结回顾",
+      "description": "学习总结和回顾文章",
+      "icon": "🔍",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "总结标题" },
+        "description": { "required": false, "type": "string", "prompt": "总结描述" },
+        "tags": { "required": false, "type": "array", "prompt": "标签 (用逗号分隔)", "default": ["总结", "回顾"] },
+        "category": { "required": false, "type": "string", "prompt": "分类", "default": "总结" },
+        "period": { "required": false, "type": "string", "prompt": "回顾周期 (如: 2024年上半年)", "default": "" }
+      },
+      "template": "review.md"
+    }
+  },
+  "projects": {
+    "web": {
+      "name": "Web项目",
+      "description": "前端/全栈Web应用项目",
+      "icon": "🌐",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "项目名称" },
+        "description": { "required": true, "type": "string", "prompt": "项目简短描述" },
+        "longDescription": { "required": true, "type": "text", "prompt": "项目详细描述" },
+        "url": { "required": true, "type": "url", "prompt": "项目GitHub链接" },
+        "demoUrl": { "required": false, "type": "url", "prompt": "项目演示链接" },
+        "tags": { "required": false, "type": "array", "prompt": "技术标签 (用逗号分隔)", "default": ["Web", "前端"] },
+        "category": { "required": false, "type": "string", "prompt": "项目分类", "default": "Web开发" },
+        "progress": { "required": false, "type": "number", "prompt": "项目进度 (0-100)", "default": 0, "min": 0, "max": 100 },
+        "status": { "required": false, "type": "select", "prompt": "项目状态", "options": ["进行中", "已完成", "暂停", "计划中"], "default": "进行中" }
+      },
+      "defaultTechnologies": [
+        { "name": "React", "icon": "fa6-brands:react" },
+        { "name": "TypeScript", "icon": "fa6-brands:js" },
+        { "name": "Tailwind CSS", "icon": "fa6-brands:css3" }
+      ],
+      "template": "web-project.md"
+    },
+    "mobile": {
+      "name": "移动应用",
+      "description": "移动端应用项目",
+      "icon": "📱",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "应用名称" },
+        "description": { "required": true, "type": "string", "prompt": "应用简短描述" },
+        "longDescription": { "required": true, "type": "text", "prompt": "应用详细描述" },
+        "url": { "required": true, "type": "url", "prompt": "项目GitHub链接" },
+        "demoUrl": { "required": false, "type": "url", "prompt": "应用下载链接" },
+        "tags": { "required": false, "type": "array", "prompt": "技术标签 (用逗号分隔)", "default": ["移动开发", "App"] },
+        "category": { "required": false, "type": "string", "prompt": "项目分类", "default": "移动开发" },
+        "progress": { "required": false, "type": "number", "prompt": "项目进度 (0-100)", "default": 0, "min": 0, "max": 100 },
+        "status": { "required": false, "type": "select", "prompt": "项目状态", "options": ["进行中", "已完成", "暂停", "计划中"], "default": "进行中" },
+        "platform": { "required": false, "type": "select", "prompt": "目标平台", "options": ["iOS", "Android", "跨平台"], "default": "跨平台" }
+      },
+      "defaultTechnologies": [
+        { "name": "React Native", "icon": "fa6-brands:react" },
+        { "name": "TypeScript", "icon": "fa6-brands:js" }
+      ],
+      "template": "mobile-project.md"
+    },
+    "backend": {
+      "name": "后端项目",
+      "description": "后端服务和API项目",
+      "icon": "⚙️",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "项目名称" },
+        "description": { "required": true, "type": "string", "prompt": "项目简短描述" },
+        "longDescription": { "required": true, "type": "text", "prompt": "项目详细描述" },
+        "url": { "required": true, "type": "url", "prompt": "项目GitHub链接" },
+        "demoUrl": { "required": false, "type": "url", "prompt": "API文档链接" },
+        "tags": { "required": false, "type": "array", "prompt": "技术标签 (用逗号分隔)", "default": ["后端", "API"] },
+        "category": { "required": false, "type": "string", "prompt": "项目分类", "default": "后端开发" },
+        "progress": { "required": false, "type": "number", "prompt": "项目进度 (0-100)", "default": 0, "min": 0, "max": 100 },
+        "status": { "required": false, "type": "select", "prompt": "项目状态", "options": ["进行中", "已完成", "暂停", "计划中"], "default": "进行中" }
+      },
+      "defaultTechnologies": [
+        { "name": "Node.js", "icon": "fa6-brands:node-js" },
+        { "name": "Express", "icon": "simple-icons:express" },
+        { "name": "MongoDB", "icon": "simple-icons:mongodb" }
+      ],
+      "template": "backend-project.md"
+    },
+    "tool": {
+      "name": "工具项目",
+      "description": "开发工具和实用程序",
+      "icon": "🔧",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "工具名称" },
+        "description": { "required": true, "type": "string", "prompt": "工具简短描述" },
+        "longDescription": { "required": true, "type": "text", "prompt": "工具详细描述" },
+        "url": { "required": true, "type": "url", "prompt": "项目GitHub链接" },
+        "demoUrl": { "required": false, "type": "url", "prompt": "在线演示链接" },
+        "tags": { "required": false, "type": "array", "prompt": "技术标签 (用逗号分隔)", "default": ["工具", "实用程序"] },
+        "category": { "required": false, "type": "string", "prompt": "项目分类", "default": "工具开发" },
+        "progress": { "required": false, "type": "number", "prompt": "项目进度 (0-100)", "default": 0, "min": 0, "max": 100 },
+        "status": { "required": false, "type": "select", "prompt": "项目状态", "options": ["进行中", "已完成", "暂停", "计划中"], "default": "进行中" }
+      },
+      "defaultTechnologies": [
+        { "name": "JavaScript", "icon": "fa6-brands:js" },
+        { "name": "Node.js", "icon": "fa6-brands:node-js" }
+      ],
+      "template": "tool-project.md"
+    },
+    "game": {
+      "name": "游戏项目",
+      "description": "游戏开发项目",
+      "icon": "🎮",
+      "fields": {
+        "title": { "required": true, "type": "string", "prompt": "游戏名称" },
+        "description": { "required": true, "type": "string", "prompt": "游戏简短描述" },
+        "longDescription": { "required": true, "type": "text", "prompt": "游戏详细描述" },
+        "url": { "required": true, "type": "url", "prompt": "项目GitHub链接" },
+        "demoUrl": { "required": false, "type": "url", "prompt": "游戏试玩链接" },
+        "tags": { "required": false, "type": "array", "prompt": "游戏标签 (用逗号分隔)", "default": ["游戏", "娱乐"] },
+        "category": { "required": false, "type": "string", "prompt": "项目分类", "default": "游戏开发" },
+        "progress": { "required": false, "type": "number", "prompt": "项目进度 (0-100)", "default": 0, "min": 0, "max": 100 },
+        "status": { "required": false, "type": "select", "prompt": "项目状态", "options": ["进行中", "已完成", "暂停", "计划中"], "default": "进行中" },
+        "genre": { "required": false, "type": "select", "prompt": "游戏类型", "options": ["动作", "冒险", "角色扮演", "策略", "益智", "休闲", "其他"], "default": "休闲" }
+      },
+      "defaultTechnologies": [
+        { "name": "Unity", "icon": "simple-icons:unity" },
+        { "name": "C#", "icon": "simple-icons:csharp" }
+      ],
+      "template": "game-project.md"
+    }
+  }
+}

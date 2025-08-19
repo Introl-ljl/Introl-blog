@@ -1,0 +1,290 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import ProjectFilter from "../components/ProjectFilter.svelte";
+import ProjectCard from "../components/ProjectCard.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+import ProgressBar from "../components/ProgressBar.astro";
+
+const projects = await getCollection("projects");
+
+// 处理项目数据，添加默认分类
+const projectsWithDefaults = projects.map(project => ({
+  ...project,
+  data: {
+    ...project.data,
+    category: project.data.category || "技术项目",
+    status: project.data.status || "进行中"
+  }
+}));
+
+// 按分类分组项目
+const projectsByCategory = projectsWithDefaults.reduce((acc, project) => {
+  const category = project.data.category;
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(project);
+  return acc;
+}, {} as Record<string, typeof projectsWithDefaults>);
+
+// 获取所有分类
+const categories = Object.keys(projectsByCategory);
+
+// 按年份分组项目
+const projectsByYear = projectsWithDefaults.reduce((acc, project) => {
+  const year = project.data.startDate.getFullYear().toString();
+  if (!acc[year]) {
+    acc[year] = [];
+  }
+  acc[year].push(project);
+  return acc;
+}, {} as Record<string, typeof projectsWithDefaults>);
+
+// 获取所有年份并排序
+const years = Object.keys(projectsByYear).sort((a, b) => Number.parseInt(b) - Number.parseInt(a));
+
+// 获取所有标签
+const allTags = [...new Set(projectsWithDefaults.flatMap(project => project.data.tags || []))];
+
+// 格式化日期
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
+// 获取状态颜色
+const getStatusColor = (status: string) => {
+  const colors = {
+    '进行中': 'status-in-progress',
+    '已完成': 'status-completed',
+    '暂停': 'status-paused',
+    '计划中': 'status-planned',
+    '即将完成': 'status-nearly-done'
+  };
+  return colors[status as keyof typeof colors] || colors['计划中'];
+};
+---
+
+<Layout title="项目展示">
+  <MainGridLayout>
+    <div class="max-w-6xl mx-auto">
+      <!-- 页面标题 -->
+      <header class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          项目展示
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          探索我的技术项目，从概念到实现的完整旅程
+        </p>
+      </header>
+
+      <!-- 项目筛选器 -->
+      <div class="mb-8">
+        <ProjectFilter 
+          client:load
+          categories={categories}
+          tags={allTags}
+        />
+      </div>
+
+      <!-- 视图切换按钮 -->
+      <div class="flex justify-center mb-8">
+        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          <button 
+            id="category-view-btn"
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+          >
+            分类视图
+          </button>
+          <button 
+            id="timeline-view-btn"
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          >
+            时间线视图
+          </button>
+        </div>
+      </div>
+
+      <!-- 分类视图 -->
+      <div id="category-view" class="space-y-12">
+        {categories.map((category) => (
+          <section data-category={category}>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+              <span class="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
+              {category}
+              <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                ({projectsByCategory[category].length})
+              </span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projectsByCategory[category].map((project) => (
+                <ProjectCard 
+                   title={project.data.title}
+                   description={project.data.description}
+                   status={project.data.status}
+                   progress={project.data.progress}
+                   tags={project.data.tags || []}
+                   category={project.data.category}
+                   lastUpdate={formatDate(project.data.lastUpdate)}
+                   url={project.data.links?.github || project.data.url}
+                   demoUrl={project.data.links?.demo || project.data.demoUrl}
+                   slug={project.slug}
+                 />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <!-- 时间线视图 -->
+      <div id="timeline-view" class="hidden space-y-12">
+        {years.map((year) => (
+          <section data-year={year}>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+              <span class="w-1 h-6 bg-green-600 rounded-full mr-3"></span>
+              {year} 年
+              <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                ({projectsByYear[year].length} 个项目)
+              </span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projectsByYear[year].map((project) => (
+                <ProjectCard 
+                  title={project.data.title}
+                  description={project.data.description}
+                  status={project.data.status}
+                  progress={project.data.progress}
+                  tags={project.data.tags || []}
+                  category={project.data.category}
+                  lastUpdate={formatDate(project.data.lastUpdate)}
+                  url={project.data.links?.github || project.data.url}
+                  demoUrl={project.data.links?.demo || project.data.demoUrl}
+                  slug={project.slug}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  </MainGridLayout>
+</Layout>
+
+  <script>
+    // 项目筛选逻辑
+    document.addEventListener('DOMContentLoaded', () => {
+      const projectFilter = document.querySelector('project-filter');
+      const categoryViewBtn = document.getElementById('category-view-btn') as HTMLButtonElement;
+      const timelineViewBtn = document.getElementById('timeline-view-btn') as HTMLButtonElement;
+      const categoryView = document.getElementById('category-view') as HTMLElement;
+      const timelineView = document.getElementById('timeline-view') as HTMLElement;
+      
+      // 视图切换功能
+      categoryViewBtn?.addEventListener('click', () => {
+        categoryView.classList.remove('hidden');
+        timelineView.classList.add('hidden');
+        
+        // 激活分类视图按钮
+        categoryViewBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+        categoryViewBtn.classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        
+        // 取消激活时间线视图按钮
+        timelineViewBtn.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        timelineViewBtn.classList.add('text-gray-600', 'dark:text-gray-400');
+      });
+      
+      timelineViewBtn?.addEventListener('click', () => {
+        timelineView.classList.remove('hidden');
+        categoryView.classList.add('hidden');
+        
+        // 激活时间线视图按钮
+        timelineViewBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
+        timelineViewBtn.classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        
+        // 取消激活分类视图按钮
+        categoryViewBtn.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        categoryViewBtn.classList.add('text-gray-600', 'dark:text-gray-400');
+      });
+      
+      if (projectFilter) {
+        projectFilter.addEventListener('filter', (event: Event) => {
+          const customEvent = event as CustomEvent;
+          const { category, tag, search } = customEvent.detail;
+          filterProjects(category, tag, search);
+        });
+      }
+      
+      function filterProjects(selectedCategory: string, selectedTag: string, searchQuery: string) {
+        const categorySections = document.querySelectorAll('.category-section') as NodeListOf<HTMLElement>;
+        const yearSections = document.querySelectorAll('.year-section') as NodeListOf<HTMLElement>;
+        const projectItems = document.querySelectorAll('.project-item') as NodeListOf<HTMLElement>;
+        
+        // 隐藏所有分类和年份标题
+        categorySections.forEach(section => {
+          section.style.display = 'none';
+        });
+        yearSections.forEach(section => {
+          section.style.display = 'none';
+        });
+        
+        let hasVisibleProjects = false;
+        
+        projectItems.forEach(item => {
+          const itemCategory = item.dataset.category || '';
+          const itemTags = JSON.parse(item.dataset.tags || '[]');
+          const itemName = item.dataset.name || '';
+          const itemDescription = item.dataset.description || '';
+          
+          let shouldShow = true;
+          
+          // 分类筛选
+          if (selectedCategory && itemCategory !== selectedCategory) {
+            shouldShow = false;
+          }
+          
+          // 标签筛选
+          if (selectedTag && !itemTags.includes(selectedTag)) {
+            shouldShow = false;
+          }
+          
+          // 搜索筛选
+          if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            if (!itemName.includes(query) && !itemDescription.includes(query)) {
+              shouldShow = false;
+            }
+          }
+          
+          if (shouldShow) {
+            item.style.display = 'block';
+            hasVisibleProjects = true;
+            
+            // 显示对应的分类或年份标题
+            const categorySection = document.querySelector(`[data-category="${itemCategory}"]`) as HTMLElement;
+            if (categorySection) {
+              categorySection.style.display = 'block';
+            }
+            
+            // 对于时间线视图，也要显示年份标题
+            const yearSection = item.closest('.year-section') as HTMLElement;
+            if (yearSection) {
+              yearSection.style.display = 'block';
+            }
+          } else {
+            item.style.display = 'none';
+          }
+        });
+        
+        // 如果没有可见项目，显示提示信息
+        if (!hasVisibleProjects) {
+          // 可以在这里添加"没有找到项目"的提示
+        }
+      }
+    });
+  </script>
+</MainGridLayout>

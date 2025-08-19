@@ -1,0 +1,29 @@
+---
+import Layout from "./Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import { PAGE_WIDTH } from "../constants/constants.ts";
+
+interface Props {
+	title?: string;
+	description?: string;
+	lang?: string;
+}
+
+const { title, description, lang } = Astro.props;
+---
+
+<Layout title={title} description={description} lang={lang}>
+	<!-- 导航栏 -->
+	<div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto">
+		<div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
+			<Navbar></Navbar>
+		</div>
+	</div>
+	
+	<!-- 主内容区域 -->
+	<main id="swup-container" class="transition-swup-fade relative max-w-[var(--page-width)] mx-auto px-0 md:px-4 mt-4">
+		<div id="content-wrapper" class="onload-animation">
+			<slot />
+		</div>
+	</main>
+</Layout>

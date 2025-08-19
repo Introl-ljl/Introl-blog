@@ -1,0 +1,73 @@
+---
+import type { GetStaticPaths, Page } from 'astro'
+import type { CollectionEntry } from 'astro:content'
+import { getSortedPosts } from '../../utils/content-utils'
+import { PAGE_SIZE } from '../../constants/constants'
+import MainGridLayout from '../../layouts/MainGridLayout.astro'
+import PostCard from '../../components/PostCard.astro'
+import BlogPagination from '../../components/control/BlogPagination.astro'
+import ProfileCard from '../../components/widget/ProfileCard.astro'
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const allBlogPosts = await getSortedPosts()
+  
+  // 从第2页开始分页，因为第1页由 /blog/index.astro 处理
+  const paginatedPosts = paginate(allBlogPosts, { pageSize: PAGE_SIZE })
+  
+  // 过滤掉第1页，只返回第2页及以后的页面
+  return paginatedPosts.filter(page => page.params.page !== undefined && Number.parseInt(page.params.page) > 1)
+}
+
+type Props = {
+  page: Page<CollectionEntry<'posts'>>
+}
+
+const { page } = Astro.props
+
+// 修正 page.url 以匹配 /blog/ 路径
+page.url.current = `/blog/${page.currentPage}/`
+page.url.next = page.currentPage < page.lastPage ? `/blog/${page.currentPage + 1}/` : undefined
+page.url.prev = page.currentPage > 1 ? (page.currentPage === 2 ? '/blog/' : `/blog/${page.currentPage - 1}/`) : undefined
+page.url.first = '/blog/'
+page.url.last = page.lastPage > 1 ? `/blog/${page.lastPage}/` : '/blog/'
+---
+
+<MainGridLayout title={`博客 - 第 ${page.currentPage} 页`} description="我的博客文章">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- 主内容区域 -->
+    <div class="lg:col-span-3">
+      <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+          <div class="grid grid-cols-1 gap-4">
+            {page.data.map((post) => (
+              <PostCard 
+                entry={post}
+                title={post.data.title}
+                url={`/posts/${post.slug}/`}
+                published={post.data.published}
+                updated={post.data.updated}
+                tags={post.data.tags || []}
+                category={post.data.category || null}
+                image={post.data.image}
+                description={post.data.description}
+                draft={post.data.draft || false}
+                style=""
+              />
+            ))}
+          </div>
+          
+          <div class="mt-8">
+            <BlogPagination page={page} />
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 侧边栏区域 -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-6 space-y-6">
+        <ProfileCard />
+      </div>
+    </div>
+  </div>
+</MainGridLayout>

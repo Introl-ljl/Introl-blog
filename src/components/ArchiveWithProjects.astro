@@ -1,0 +1,180 @@
+---
+import ArchivePanel from "@components/ArchivePanel.svelte";
+import { getSortedPosts, getSortedPostsList, getSortedProjectsList } from "@utils/content-utils";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import { Icon } from "astro-icon/components";
+
+// 获取所有文章
+const sortedPostsList = await getSortedPostsList();
+
+// 获取所有项目
+const sortedProjectsList = await getSortedProjectsList();
+
+// 按年份分组项目
+const projectsByYear = sortedProjectsList.reduce(
+	(acc: Record<number, typeof sortedProjectsList>, project) => {
+		const projectDate = new Date(project.data.startDate || project.data.lastUpdate);
+		const year = projectDate.getFullYear();
+		if (!acc[year]) {
+			acc[year] = [];
+		}
+		acc[year].push(project);
+		return acc;
+	},
+	{} as Record<number, typeof sortedProjectsList>,
+);
+
+const projectYears = Object.keys(projectsByYear)
+	.map(Number)
+	.sort((a, b) => b - a);
+---
+
+<div class="w-full">
+  <!-- 标题区域 -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-[var(--primary)] mb-4">归档</h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400">博客文章与项目的完整归档</p>
+  </div>
+
+  <!-- 选项卡导航 -->
+  <div class="flex justify-center mb-8">
+    <div class="bg-[var(--card-bg)] rounded-lg p-1 shadow-sm">
+      <button 
+        id="posts-tab" 
+        class="tab-button active px-6 py-2 rounded-md font-medium transition-all duration-200"
+        onclick="showTab('posts')"
+      >
+        <Icon name="material-symbols:article-outline" class="w-4 h-4 mr-2 inline" />
+        博客文章
+      </button>
+      <button 
+        id="projects-tab" 
+        class="tab-button px-6 py-2 rounded-md font-medium transition-all duration-200"
+        onclick="showTab('projects')"
+      >
+        <Icon name="material-symbols:folder-open-outline" class="w-4 h-4 mr-2 inline" />
+        项目
+      </button>
+    </div>
+  </div>
+
+  <!-- 博客文章内容 -->
+  <div id="posts-content" class="tab-content">
+    <div class="card-base p-6">
+      <ArchivePanel sortedPosts={sortedPostsList} client:only="svelte" />
+    </div>
+  </div>
+
+  <!-- 项目内容 -->
+  <div id="projects-content" class="tab-content hidden">
+    <div class="space-y-8">
+      {projectYears.map(year => (
+        <div class="card-base p-6">
+          <h2 class="text-2xl font-bold text-[var(--primary)] mb-6 flex items-center">
+            <Icon name="material-symbols:calendar-today-outline" class="w-6 h-6 mr-2" />
+            {year}
+          </h2>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {projectsByYear[year].map(project => (
+              <div class="bg-[var(--btn-plain-bg)] rounded-lg p-6 hover:bg-[var(--btn-plain-bg-hover)] transition-all duration-200 hover:shadow-md hover:-translate-y-1 transform">
+                <div class="flex items-start justify-between mb-3">
+                  <h3 class="text-lg font-semibold text-[var(--primary)] mb-2">
+                    {project.data.title}
+                  </h3>
+                  <span class={`px-2 py-1 text-xs rounded-full ${
+                    project.data.progress >= 100
+                      ? 'status-completed' 
+                      : 'status-in-progress'
+                  }`}>
+                    {project.data.progress >= 100 ? '完成' : '进行中'}
+                  </span>
+                </div>
+                
+                <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                  {project.data.description}
+                </p>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                  {project.data.tags?.map((tech: string) => (
+                    <span class="px-2 py-1 text-xs bg-[var(--primary)]/10 text-[var(--primary)] rounded-md">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-500">
+                  <div class="flex items-center">
+                    <Icon name="material-symbols:calendar-today-outline" class="w-4 h-4 mr-1" />
+                    <time>{formatDateToYYYYMMDD(new Date(project.data.startDate || project.data.lastUpdate))}</time>
+                  </div>
+                  
+                  {project.data.url && (
+                    <a 
+                      href={project.data.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      class="flex items-center text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors duration-200"
+                    >
+                      <Icon name="material-symbols:open-in-new" class="w-4 h-4 mr-1" />
+                      查看项目
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .tab-button {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+  
+  .tab-button.active {
+    @apply bg-[var(--primary)] text-white shadow-sm;
+  }
+  
+  .tab-button:not(.active):hover {
+    @apply bg-[var(--btn-plain-bg-hover)] text-[var(--primary)];
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  function showTab(tabName: string) {
+    // 隐藏所有内容
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.add('hidden');
+    });
+    
+    // 移除所有按钮的active状态
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // 显示选中的内容
+    const contentElement = document.getElementById(`${tabName}-content`);
+    if (contentElement) {
+      contentElement.classList.remove('hidden');
+    }
+    
+    // 激活选中的按钮
+    const tabElement = document.getElementById(`${tabName}-tab`);
+    if (tabElement) {
+      tabElement.classList.add('active');
+    }
+  }
+  
+  // 确保函数在全局作用域中可用
+  (window as any).showTab = showTab;
+</script>

@@ -1,0 +1,40 @@
+---
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "@/config";
+
+const config = profileConfig;
+---
+
+<!-- 个人资料卡片 -->
+<div class="card-base p-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+  <div class="text-center mb-6">
+    <div class="relative inline-block mb-4">
+      <ImageWrapper
+        src={config.avatar || ""}
+        alt="Avatar"
+        class="w-24 h-24 rounded-full object-cover ring-4 ring-[var(--primary)]/20 shadow-lg"
+      />
+      <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[var(--card-bg)]"></div>
+    </div>
+    <h2 class="text-lg font-bold text-[var(--primary)] mb-2">
+      {config.name}
+    </h2>
+    <p class="text-sm text-75 mb-4">{config.bio}</p>
+  </div>
+
+  <!-- 社交链接 -->
+  <div class="flex justify-center space-x-3">
+    {config.links.map((link: any) => (
+      <a
+        href={link.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="w-8 h-8 bg-[var(--btn-plain-bg)] rounded-lg flex items-center justify-center hover:bg-[var(--btn-plain-bg-hover)] transition-all duration-200 hover:scale-110 transform"
+        aria-label={link.name}
+      >
+        <Icon name={link.icon} class="w-4 h-4 text-75" />
+      </a>
+    ))}
+  </div>
+</div>
