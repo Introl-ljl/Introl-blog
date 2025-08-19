@@ -1,3 +1,4 @@
+import netlify from "@astrojs/netlify";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
@@ -26,6 +27,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
 // https://astro.build/config
 export default defineConfig({
+	output: "server",
 	site: "https://blog.introl.top/",
 	base: "/",
 	trailingSlash: "always",
@@ -33,6 +35,7 @@ export default defineConfig({
 		tailwind({
 			nesting: true,
 		}),
+		netlify(),
 		swup({
 			theme: false,
 			animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
@@ -103,58 +106,67 @@ export default defineConfig({
 		}),
 		svelte(),
 		sitemap({
-			changefreq: 'weekly',
+			changefreq: "weekly",
 			priority: 0.7,
 			lastmod: new Date(),
 			customPages: [
-				'https://blog.introl.top/',
-				'https://blog.introl.top/about/',
-				'https://blog.introl.top/archive/',
-				'https://blog.introl.top/projects/',
-				'https://blog.introl.top/bookmarks/',
-				'https://blog.introl.top/friends/',
+				"https://blog.introl.top/",
+				"https://blog.introl.top/about/",
+				"https://blog.introl.top/archive/",
+				"https://blog.introl.top/projects/",
+				"https://blog.introl.top/bookmarks/",
+				"https://blog.introl.top/friends/",
 			],
 			filter: (page) => {
 				// 排除分页页面的重复内容
-				if (page.includes('/2/') || page.includes('/3/') || page.includes('/4/')) {
+				if (
+					page.includes("/2/") ||
+					page.includes("/3/") ||
+					page.includes("/4/")
+				) {
 					return false;
 				}
 				return true;
 			},
 			serialize: (item) => {
 				// 为不同类型的页面设置不同的优先级和更新频率
-				if (item.url === 'https://blog.introl.top/') {
+				if (item.url === "https://blog.introl.top/") {
 					return {
 						...item,
 						priority: 1.0,
-						changefreq: 'daily',
+						changefreq: "daily",
 					};
 				}
-				if (item.url.includes('/posts/')) {
+				if (item.url.includes("/posts/")) {
 					return {
 						...item,
 						priority: 0.8,
-						changefreq: 'monthly',
+						changefreq: "monthly",
 					};
 				}
-				if (item.url.includes('/projects/')) {
+				if (item.url.includes("/projects/")) {
 					return {
 						...item,
 						priority: 0.7,
-						changefreq: 'monthly',
+						changefreq: "monthly",
 					};
 				}
-				if (item.url.includes('/about/') || item.url.includes('/archive/') || item.url.includes('/bookmarks/') || item.url.includes('/friends/')) {
+				if (
+					item.url.includes("/about/") ||
+					item.url.includes("/archive/") ||
+					item.url.includes("/bookmarks/") ||
+					item.url.includes("/friends/")
+				) {
 					return {
 						...item,
 						priority: 0.6,
-						changefreq: 'weekly',
+						changefreq: "weekly",
 					};
 				}
 				return {
 					...item,
 					priority: 0.5,
-					changefreq: 'weekly',
+					changefreq: "weekly",
 				};
 			},
 		}),
