@@ -66,8 +66,8 @@ export const navBarConfig: NavBarConfig = {
 
 		LinkPreset.About, // 预设的"关于"链接
 		{
-			name: "GitHub", // 链接名称
-			url: "https://github.com/saicaca/fuwari", // 链接地址
+			name: "Alist", // 链接名称
+			url: "https://alist.introl.top", // 链接地址
 			external: true, // 是否为外部链接，在新标签页打开
 		},
 	],
@@ -87,7 +87,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Email",
 			icon: "material-symbols:mail-outline",
-			url: "mailto:contact@example.com",
+			url: "mailto:introl-ljl@qq.com",
 		},
 	],
 };
