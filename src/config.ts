@@ -142,10 +142,11 @@ export const githubHeatmapConfig = {
 		// 数据获取方式:
 		// 1. 'mock' - 使用模拟数据（默认，无需API调用）
 		// 2. 'github-api' - 通过GitHub API获取真实数据（需要配置token）
-		// 3. 'custom' - 自定义数据源
-		source: "github-api",
+		// 3. 'local-git' - 使用本地Git仓库数据
+		// 4. 'combined' - 合并GitHub和本地Git数据
+		source: (process.env.HEATMAP_DATA_SOURCE as 'mock' | 'github-api' | 'local-git' | 'combined') || "github-api",
 
-		// GitHub API配置（当source为'github-api'时使用）
+		// GitHub API配置（当source为'github-api'或'combined'时使用）
 		githubApi: {
 			// GitHub Personal Access Token（可选，但建议配置以避免API限制）
 			// 获取方式: GitHub Settings > Developer settings > Personal access tokens
@@ -157,6 +158,21 @@ export const githubHeatmapConfig = {
 			// API请求配置
 			cacheTime: 3600, // 缓存时间（秒），避免频繁请求
 			timeout: 10000, // 请求超时时间（毫秒）
+		},
+
+		// 本地Git配置（当source为'local-git'或'combined'时使用）
+		localGit: {
+			// 本地Git仓库路径
+			repoPath: process.env.LOCAL_GIT_REPO_PATH ?? "/root/git-repos/blog.git",
+			
+			// 统计天数
+			days: 365,
+			
+			// 作者过滤（可选，留空则统计所有作者）
+			author: "", // 例如: "John Doe" 或 "john@example.com"
+			
+			// 缓存配置
+			cacheTime: 1800, // 缓存时间（秒），本地Git数据变化较少
 		},
 
 		// 模拟数据配置（当source为'mock'时使用）

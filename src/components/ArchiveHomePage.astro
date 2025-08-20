@@ -6,6 +6,7 @@ import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import { githubHeatmapConfig, homePageConfig, profileConfig } from "@/config";
+import { fetchLocalGitStats, mergeGitData } from "@utils/git-stats";
 
 // 获取最近的文章
 const sortedPosts = await getSortedPosts();
@@ -237,12 +238,48 @@ function generateMonthLabels(contributions: any[]) {
 
 // 根据配置选择数据源
 let heatmapData: any[];
-if (githubHeatmapConfig.data.source === "github-api") {
+const dataSource = githubHeatmapConfig.data.source;
+
+if (dataSource === "github-api") {
 	const apiData = await fetchGitHubContributions();
 	if (apiData) {
 		heatmapData = apiData;
 	} else {
 		console.log("Using mock data as fallback");
+		heatmapData = generateMockData();
+	}
+} else if (dataSource === "local-git") {
+	try {
+		const localData = await fetchLocalGitStats(githubHeatmapConfig.data.localGit);
+		heatmapData = localData;
+	} catch (error) {
+		console.warn("Failed to fetch local git data, falling back to mock data:", error);
+		heatmapData = generateMockData();
+	}
+} else if (dataSource === "combined") {
+	try {
+		const [githubData, localData] = await Promise.allSettled([
+			fetchGitHubContributions(),
+			fetchLocalGitStats(githubHeatmapConfig.data.localGit)
+		]);
+		
+		const github = githubData.status === 'fulfilled' ? githubData.value : null;
+		const local = localData.status === 'fulfilled' ? localData.value : null;
+		
+		if (github && local) {
+			heatmapData = mergeGitData([github, local]);
+		} else if (github) {
+			console.log("Using GitHub data only (local git failed)");
+			heatmapData = github;
+		} else if (local) {
+			console.log("Using local git data only (GitHub API failed)");
+			heatmapData = local;
+		} else {
+			console.log("Both data sources failed, using mock data");
+			heatmapData = generateMockData();
+		}
+	} catch (error) {
+		console.warn("Failed to fetch combined data, falling back to mock data:", error);
 		heatmapData = generateMockData();
 	}
 } else {
@@ -360,11 +397,13 @@ const startRow = firstDate.getDay();
     </div>
   </div>
 
-  <!-- GitHub 贡献热力图卡片 -->
+  <!-- 贡献热力图卡片 -->
   <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 col-span-1 md:col-span-2 lg:col-span-2">
     <div class="flex items-center mb-4">
-      <Icon name="fa6-brands:github" class="w-5 h-5 mr-2 text-[var(--primary)]" />
-      <h2 class="text-lg font-semibold text-[var(--primary)]">2025年GitHub提交</h2>
+      <Icon name={dataSource === 'local-git' ? 'material-symbols:folder-code-outline' : dataSource === 'combined' ? 'material-symbols:merge-type' : 'fa6-brands:github'} class="w-5 h-5 mr-2 text-[var(--primary)]" />
+      <h2 class="text-lg font-semibold text-[var(--primary)]">
+        {dataSource === 'local-git' ? '2025年本地Git提交' : dataSource === 'combined' ? '2025年代码提交统计' : '2025年GitHub提交'}
+      </h2>
     </div>
     <div class="bg-[var(--btn-plain-bg)] rounded-lg p-4">
       {githubHeatmapConfig.display.showStats && (

@@ -16,6 +16,8 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+# Keep .env.example for template reference
+!.env.example
 
 # macOS-specific files
 .DS_Store
@@ -60,3 +62,6 @@ scripts/blog-assistant.js
 scripts/blog-helper.js
 scripts/wizard.js
 scripts/quick-start.sh
+
+# Local Netlify folder
+.netlify
