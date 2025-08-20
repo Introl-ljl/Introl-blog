@@ -9,7 +9,13 @@ export function pathsEqual(path1: string, path2: string) {
 
 function joinUrl(...parts: string[]): string {
 	const joined = parts.join("/");
-	return joined.replace(/\/+/g, "/");
+	// 处理多个连续的斜杠，但保留末尾的斜杠
+	const normalized = joined.replace(/\/+/g, "/");
+	// 如果原始路径以斜杠结尾，确保结果也以斜杠结尾
+	if (joined.endsWith("/") && !normalized.endsWith("/")) {
+		return normalized + "/";
+	}
+	return normalized;
 }
 
 export function getPostUrlBySlug(slug: string): string {

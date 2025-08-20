@@ -19,7 +19,7 @@ function getColorClasses(color: string): string {
     case 'red':
       return 'bg-red-500';
     default:
-      return 'bg-blue-500';
+      return 'bg-[var(--primary)]';
   }
 }
 
@@ -41,11 +41,11 @@ const clampedProgress = Math.max(0, Math.min(100, progress));
 <div class="w-full">
   {showLabel && (
     <div class="flex justify-between items-center mb-1">
-      <span class="text-sm text-gray-600">进度</span>
-      <span class="text-sm font-medium text-gray-700">{clampedProgress}%</span>
+      <span class="text-sm text-60">进度</span>
+      <span class="text-sm font-medium text-75">{clampedProgress}%</span>
     </div>
   )}
-  <div class={`w-full bg-gray-200 rounded-full ${getSizeClasses(size)}`}>
+  <div class={`w-full bg-[var(--btn-regular-bg)] rounded-full ${getSizeClasses(size)}`}>
     <div 
       class={`${getColorClasses(color)} ${getSizeClasses(size)} rounded-full transition-all duration-500 ease-out`}
       style={`width: ${clampedProgress}%`}

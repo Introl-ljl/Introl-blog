@@ -1,15 +1,15 @@
 ---
 import { getCollection } from "astro:content";
+import PostMeta from "../../components/PostMeta.astro";
 import Layout from "../../layouts/Layout.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
-import PostMeta from "../../components/PostMeta.astro";
 
 export async function getStaticPaths() {
-  const projects = await getCollection("projects");
-  return projects.map((project) => ({
-    params: { slug: project.slug },
-    props: { project },
-  }));
+	const projects = await getCollection("projects");
+	return projects.map((project) => ({
+		params: { slug: project.slug },
+		props: { project },
+	}));
 }
 
 const { project } = Astro.props;
@@ -17,28 +17,28 @@ const { Content } = await project.render();
 
 // 获取与该项目关联的文章
 const posts = await getCollection("posts");
-const relatedPosts = posts.filter(post => 
-  post.data.project === project.slug && !post.data.draft
-).sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
+const relatedPosts = posts
+	.filter((post) => post.data.project === project.slug && !post.data.draft)
+	.sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
 
 // 格式化日期
 const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
+	return new Intl.DateTimeFormat("zh-CN", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	}).format(date);
 };
 
 // 获取状态颜色
 const getStatusColor = (status: string) => {
-  const colors = {
-    '进行中': 'status-in-progress',
-    '已完成': 'status-completed',
-    '暂停': 'status-paused',
-    '计划中': 'status-planned'
-  };
-  return colors[status as keyof typeof colors] || colors['进行中'];
+	const colors = {
+		进行中: "status-in-progress",
+		已完成: "status-completed",
+		暂停: "status-paused",
+		计划中: "status-planned",
+	};
+	return colors[status as keyof typeof colors] || colors["进行中"];
 };
 ---
 

@@ -144,7 +144,12 @@ export const githubHeatmapConfig = {
 		// 2. 'github-api' - 通过GitHub API获取真实数据（需要配置token）
 		// 3. 'local-git' - 使用本地Git仓库数据
 		// 4. 'combined' - 合并GitHub和本地Git数据
-		source: (process.env.HEATMAP_DATA_SOURCE as 'mock' | 'github-api' | 'local-git' | 'combined') || "github-api",
+		source:
+			(process.env.HEATMAP_DATA_SOURCE as
+				| "mock"
+				| "github-api"
+				| "local-git"
+				| "combined") || "github-api",
 
 		// GitHub API配置（当source为'github-api'或'combined'时使用）
 		githubApi: {
@@ -152,7 +157,7 @@ export const githubHeatmapConfig = {
 			// 获取方式: GitHub Settings > Developer settings > Personal access tokens
 			// 所需权限: public_repo 或 repo（如果需要访问私有仓库）
 			// 强烈建议不要将 Personal Access Token 直接硬编码在代码中。
-            // 推荐使用环境变量 `GITHUB_TOKEN` 来进行配置。
+			// 推荐使用环境变量 `GITHUB_TOKEN` 来进行配置。
 			token: process.env.GITHUB_TOKEN ?? "", // 留空则使用匿名访问（有API限制）
 
 			// API请求配置
@@ -164,13 +169,13 @@ export const githubHeatmapConfig = {
 		localGit: {
 			// 本地Git仓库路径
 			repoPath: process.env.LOCAL_GIT_REPO_PATH ?? "/root/git-repos/blog.git",
-			
+
 			// 统计天数
 			days: 365,
-			
+
 			// 作者过滤（可选，留空则统计所有作者）
 			author: "", // 例如: "John Doe" 或 "john@example.com"
-			
+
 			// 缓存配置
 			cacheTime: 1800, // 缓存时间（秒），本地Git数据变化较少
 		},

@@ -3,10 +3,10 @@ import { getCollection } from "astro:content";
 import ImageWrapper from "@components/misc/ImageWrapper.astro";
 import { getSortedPosts } from "@utils/content-utils";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
+import { fetchLocalGitStats, mergeGitData } from "@utils/git-stats";
 import { getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import { githubHeatmapConfig, homePageConfig, profileConfig } from "@/config";
-import { fetchLocalGitStats, mergeGitData } from "@utils/git-stats";
 
 // 获取最近的文章
 const sortedPosts = await getSortedPosts();
@@ -250,22 +250,27 @@ if (dataSource === "github-api") {
 	}
 } else if (dataSource === "local-git") {
 	try {
-		const localData = await fetchLocalGitStats(githubHeatmapConfig.data.localGit);
+		const localData = await fetchLocalGitStats(
+			githubHeatmapConfig.data.localGit,
+		);
 		heatmapData = localData;
 	} catch (error) {
-		console.warn("Failed to fetch local git data, falling back to mock data:", error);
+		console.warn(
+			"Failed to fetch local git data, falling back to mock data:",
+			error,
+		);
 		heatmapData = generateMockData();
 	}
 } else if (dataSource === "combined") {
 	try {
 		const [githubData, localData] = await Promise.allSettled([
 			fetchGitHubContributions(),
-			fetchLocalGitStats(githubHeatmapConfig.data.localGit)
+			fetchLocalGitStats(githubHeatmapConfig.data.localGit),
 		]);
-		
-		const github = githubData.status === 'fulfilled' ? githubData.value : null;
-		const local = localData.status === 'fulfilled' ? localData.value : null;
-		
+
+		const github = githubData.status === "fulfilled" ? githubData.value : null;
+		const local = localData.status === "fulfilled" ? localData.value : null;
+
 		if (github && local) {
 			heatmapData = mergeGitData([github, local]);
 		} else if (github) {
@@ -279,7 +284,10 @@ if (dataSource === "github-api") {
 			heatmapData = generateMockData();
 		}
 	} catch (error) {
-		console.warn("Failed to fetch combined data, falling back to mock data:", error);
+		console.warn(
+			"Failed to fetch combined data, falling back to mock data:",
+			error,
+		);
 		heatmapData = generateMockData();
 	}
 } else {
