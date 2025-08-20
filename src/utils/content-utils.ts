@@ -6,6 +6,7 @@ import { getCategoryUrl } from "@utils/url-utils.ts";
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts() {
 	const allBlogPosts = await getCollection("posts", ({ data }) => {
+		// 只过滤草稿，不过滤带有project字段的文章
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
 

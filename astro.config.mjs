@@ -27,7 +27,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
 // https://astro.build/config
 export default defineConfig({
-	output: "server",
+	output: "static",
 	site: "https://blog.introl.top/",
 	base: "/",
 	trailingSlash: "always",
@@ -35,7 +35,7 @@ export default defineConfig({
 		tailwind({
 			nesting: true,
 		}),
-		netlify(),
+		// netlify(),
 		swup({
 			theme: false,
 			animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
