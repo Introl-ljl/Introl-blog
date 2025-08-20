@@ -21,6 +21,18 @@ const postsCollection = defineCollection({
 		nextSlug: z.string().default(""),
 	}),
 });
+
+const announcementsCollection = defineCollection({
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		type: z.enum(["info", "warning", "success", "error"]).optional().default("info"),
+		icon: z.string().optional().default("material-symbols:info-outline"),
+		published: z.date(),
+		order: z.number().optional().default(0), // 排序权重，数字越大越靠前
+		draft: z.boolean().optional().default(false),
+	}),
+});
 const specCollection = defineCollection({
 	schema: z.object({}),
 });
@@ -78,4 +90,5 @@ export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
 	projects: projectsCollection,
+	announcements: announcementsCollection,
 };

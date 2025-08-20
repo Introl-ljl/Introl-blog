@@ -27,6 +27,14 @@ const recentProjects = projectEntries
 		slug: entry.slug,
 	}));
 
+// 获取公告数据
+const announcementEntries = await getCollection("announcements", ({ data }) => {
+	return data.draft !== true;
+});
+const announcements = announcementEntries
+	.sort((a, b) => (b.data.order || 0) - (a.data.order || 0) || b.data.published.getTime() - a.data.published.getTime())
+	.slice(0, 3); // 最多显示3条公告
+
 // 月份名称
 const MONTHS = [
 	"Jan",
@@ -344,8 +352,8 @@ const startRow = firstDate.getDay();
     </div>
   </div>
 
-  <!-- 导航卡片 -->
-  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+  <!-- 导航卡片 - 已禁用 -->
+  <!-- <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
     <div class="flex items-center mb-4">
       <Icon name="material-symbols:explore-outline" class="w-5 h-5 mr-2 text-[var(--primary)]" />
       <h2 class="text-lg font-semibold text-[var(--primary)]">导航</h2>
@@ -368,6 +376,42 @@ const startRow = firstDate.getDay();
           <Icon name="material-symbols:arrow-forward" class="w-4 h-4 text-50 group-hover:text-[var(--primary)] transition-colors duration-200" />
         </a>
       ))}
+    </div>
+  </div> -->
+
+  <!-- 公告版卡片 -->
+  <div class="card-base p-8 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center mb-4">
+      <Icon name="material-symbols:campaign-outline" class="w-5 h-5 mr-2 text-[var(--primary)]" />
+      <h2 class="text-lg font-semibold text-[var(--primary)]">公告</h2>
+    </div>
+    <div class="space-y-4">
+      {announcements.map((announcement) => {
+        const typeColors = {
+          info: { border: 'border-[var(--primary)]', bg: 'bg-[var(--primary)]/10', text: 'text-[var(--primary)]' },
+          success: { border: 'border-green-500', bg: 'bg-green-500/10', text: 'text-green-500' },
+          warning: { border: 'border-yellow-500', bg: 'bg-yellow-500/10', text: 'text-yellow-500' },
+          error: { border: 'border-red-500', bg: 'bg-red-500/10', text: 'text-red-500' }
+        };
+        const colors = typeColors[announcement.data.type] || typeColors.info;
+        return (
+          <div class={`p-4 rounded-lg bg-[var(--btn-plain-bg)] border-l-4 ${colors.border}`}>
+            <div class="flex items-start">
+              <div class={`w-8 h-8 ${colors.bg} rounded-lg flex items-center justify-center mr-3 flex-shrink-0`}>
+                <Icon name={announcement.data.icon} class={`w-4 h-4 ${colors.text}`} />
+              </div>
+              <div class="flex-1">
+                <h3 class="font-medium text-75 mb-1">{announcement.data.title}</h3>
+                <p class="text-sm text-60 mb-2">{announcement.data.description}</p>
+                <div class="flex items-center text-xs text-50">
+                  <Icon name="material-symbols:schedule-outline" class="w-3 h-3 mr-1" />
+                  <time>{formatDateToYYYYMMDD(announcement.data.published)}</time>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   </div>
 
