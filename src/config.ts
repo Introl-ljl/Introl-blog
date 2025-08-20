@@ -63,11 +63,7 @@ export const navBarConfig: NavBarConfig = {
 			url: "/friends/", // 链接地址
 			external: false, // 内部链接
 		},
-		{
-			name: "收藏夹", // 收藏夹页面链接
-			url: "/bookmarks/", // 链接地址
-			external: false, // 内部链接
-		},
+
 		LinkPreset.About, // 预设的"关于"链接
 		{
 			name: "GitHub", // 链接名称

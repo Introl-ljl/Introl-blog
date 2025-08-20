@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
-import ProjectFilter from "../components/ProjectFilter.svelte";
+
 import ProjectCard from "../components/ProjectCard.astro";
 import StatusBadge from "../components/StatusBadge.astro";
 import ProgressBar from "../components/ProgressBar.astro";
@@ -98,32 +98,25 @@ const getStatusColor = (status: string) => {
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
           项目展示
         </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p class="text-lg text-75 max-w-2xl mx-auto">
           探索我的技术项目，从概念到实现的完整旅程
         </p>
       </header>
 
-      <!-- 项目筛选器 -->
-      <div class="mb-8">
-        <ProjectFilter 
-          client:load
-          categories={categories}
-          tags={allTags}
-        />
-      </div>
+
 
       <!-- 视图切换按钮 -->
       <div class="flex justify-center mb-8">
-        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div class="bg-[var(--btn-regular-bg)] rounded-lg p-1">
           <button 
             id="category-view-btn"
-            class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-[var(--card-bg)] text-90 shadow-sm"
           >
             分类视图
           </button>
           <button 
             id="timeline-view-btn"
-            class="px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            class="px-4 py-2 rounded-md text-sm font-medium transition-colors text-60 hover:text-90"
           >
             时间线视图
           </button>
@@ -374,9 +367,8 @@ const getStatusColor = (status: string) => {
 </Layout>
 
   <script>
-    // 项目筛选逻辑
+    // 视图切换逻辑
     document.addEventListener('DOMContentLoaded', () => {
-      const projectFilter = document.querySelector('project-filter');
       const categoryViewBtn = document.getElementById('category-view-btn') as HTMLButtonElement;
       const timelineViewBtn = document.getElementById('timeline-view-btn') as HTMLButtonElement;
       const categoryView = document.getElementById('category-view') as HTMLElement;
@@ -388,12 +380,12 @@ const getStatusColor = (status: string) => {
         timelineView.classList.add('hidden');
         
         // 激活分类视图按钮
-        categoryViewBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
-        categoryViewBtn.classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        categoryViewBtn.classList.remove('text-60');
+        categoryViewBtn.classList.add('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
         
         // 取消激活时间线视图按钮
-        timelineViewBtn.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-        timelineViewBtn.classList.add('text-gray-600', 'dark:text-gray-400');
+        timelineViewBtn.classList.remove('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
+        timelineViewBtn.classList.add('text-60');
       });
       
       timelineViewBtn?.addEventListener('click', () => {
@@ -401,88 +393,15 @@ const getStatusColor = (status: string) => {
         categoryView.classList.add('hidden');
         
         // 激活时间线视图按钮
-        timelineViewBtn.classList.remove('text-gray-600', 'dark:text-gray-400');
-        timelineViewBtn.classList.add('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
+        timelineViewBtn.classList.remove('text-60');
+        timelineViewBtn.classList.add('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
         
         // 取消激活分类视图按钮
-        categoryViewBtn.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm');
-        categoryViewBtn.classList.add('text-gray-600', 'dark:text-gray-400');
+        categoryViewBtn.classList.remove('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
+        categoryViewBtn.classList.add('text-60');
       });
       
-      if (projectFilter) {
-        projectFilter.addEventListener('filter', (event: Event) => {
-          const customEvent = event as CustomEvent;
-          const { category, tag, search } = customEvent.detail;
-          filterProjects(category, tag, search);
-        });
-      }
-      
-      function filterProjects(selectedCategory: string, selectedTag: string, searchQuery: string) {
-        const categorySections = document.querySelectorAll('.category-section') as NodeListOf<HTMLElement>;
-        const yearSections = document.querySelectorAll('.year-section') as NodeListOf<HTMLElement>;
-        const projectItems = document.querySelectorAll('.project-item') as NodeListOf<HTMLElement>;
-        
-        // 隐藏所有分类和年份标题
-        categorySections.forEach(section => {
-          section.style.display = 'none';
-        });
-        yearSections.forEach(section => {
-          section.style.display = 'none';
-        });
-        
-        let hasVisibleProjects = false;
-        
-        projectItems.forEach(item => {
-          const itemCategory = item.dataset.category || '';
-          const itemTags = JSON.parse(item.dataset.tags || '[]');
-          const itemName = item.dataset.name || '';
-          const itemDescription = item.dataset.description || '';
-          
-          let shouldShow = true;
-          
-          // 分类筛选
-          if (selectedCategory && itemCategory !== selectedCategory) {
-            shouldShow = false;
-          }
-          
-          // 标签筛选
-          if (selectedTag && !itemTags.includes(selectedTag)) {
-            shouldShow = false;
-          }
-          
-          // 搜索筛选
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            if (!itemName.includes(query) && !itemDescription.includes(query)) {
-              shouldShow = false;
-            }
-          }
-          
-          if (shouldShow) {
-            item.style.display = 'block';
-            hasVisibleProjects = true;
-            
-            // 显示对应的分类或年份标题
-            const categorySection = document.querySelector(`[data-category="${itemCategory}"]`) as HTMLElement;
-            if (categorySection) {
-              categorySection.style.display = 'block';
-            }
-            
-            // 对于时间线视图，也要显示年份标题
-            const yearSection = item.closest('.year-section') as HTMLElement;
-            if (yearSection) {
-              yearSection.style.display = 'block';
-            }
-          } else {
-            item.style.display = 'none';
-          }
-        });
-        
-        // 如果没有可见项目，显示提示信息
-        if (!hasVisibleProjects) {
-          // 可以在这里添加"没有找到项目"的提示
-        }
-      }
+
     });
   </script>
 </MainGridLayout>

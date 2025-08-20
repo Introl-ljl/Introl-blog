@@ -25,22 +25,7 @@ const specCollection = defineCollection({
 	schema: z.object({}),
 });
 
-const bookmarksCollection = defineCollection({
-	schema: z.object({
-		category: z.string(),
-		description: z.string().optional().default(""),
-		order: z.number().optional().default(0), // 分类排序
-		items: z.array(z.object({
-			name: z.string(),
-			description: z.string(),
-			url: z.string().url(),
-			icon: z.string(),
-			color: z.string(), // Tailwind CSS 背景色类名
-			tags: z.array(z.string()).optional().default([]),
-			featured: z.boolean().optional().default(false), // 是否为推荐网站
-		})),
-	}),
-});
+
 
 const projectsCollection = defineCollection({
 	schema: z.object({
@@ -92,6 +77,5 @@ const projectsCollection = defineCollection({
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
-	bookmarks: bookmarksCollection,
 	projects: projectsCollection,
 };
