@@ -1,0 +1,49 @@
+---
+import { giscusConfig } from "../config";
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+{giscusConfig.enable && (
+	<div class={`giscus-container ${className || ""}`}>
+		<script
+			src="https://giscus.app/client.js"
+			data-repo={giscusConfig.repo}
+			data-repo-id={giscusConfig.repoId}
+			data-category={giscusConfig.category}
+			data-category-id={giscusConfig.categoryId}
+			data-mapping={giscusConfig.mapping}
+			data-strict="0"
+			data-reactions-enabled={giscusConfig.reactionsEnabled}
+			data-emit-metadata={giscusConfig.emitMetadata}
+			data-input-position={giscusConfig.inputPosition}
+			data-theme={giscusConfig.theme}
+			data-lang={giscusConfig.lang}
+			data-loading={giscusConfig.loading}
+			crossorigin="anonymous"
+			async
+		></script>
+	</div>
+)}
+
+<style>
+	.giscus-container {
+		@apply mt-8 mb-4;
+	}
+	
+	/* 确保评论区域在暗色模式下正确显示 */
+	.giscus-container :global(.giscus) {
+		@apply w-full;
+	}
+	
+	/* 响应式设计 */
+	@media (max-width: 768px) {
+		.giscus-container {
+			@apply mt-6 mb-3;
+		}
+	}
+</style>

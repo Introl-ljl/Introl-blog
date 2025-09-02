@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import ProfileCard from "../components/widget/ProfileCard.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
+import Giscus from "../components/Giscus.astro";
 
 // 友链数据
 const friends = [
@@ -119,6 +120,9 @@ const friends = [
               </div>
             </div>
           </div>
+          
+          <!-- Giscus评论系统 -->
+          <Giscus class="mt-8" />
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ export const siteConfig: SiteConfig = {
 	},
 	toc: {
 		enable: true, // 是否在文章页面显示目录
-		depth: 2, // 目录显示的最大标题层级
+		depth: 4, // 目录显示的最大标题层级
 	},
 	favicon: [
 		// 网站图标配置，留空则使用默认图标
@@ -141,7 +141,7 @@ export const githubHeatmapConfig = {
 		// 3. 'local-git' - 使用本地Git仓库数据
 		// 4. 'combined' - 合并GitHub和本地Git数据
 		source:
-			(process.env.HEATMAP_DATA_SOURCE as
+			(typeof process !== 'undefined' && process.env?.HEATMAP_DATA_SOURCE as
 				| "mock"
 				| "github-api"
 				| "local-git"
@@ -154,7 +154,7 @@ export const githubHeatmapConfig = {
 			// 所需权限: public_repo 或 repo（如果需要访问私有仓库）
 			// 强烈建议不要将 Personal Access Token 直接硬编码在代码中。
 			// 推荐使用环境变量 `GITHUB_TOKEN` 来进行配置。
-			token: process.env.GITHUB_TOKEN ?? "", // 留空则使用匿名访问（有API限制）
+			token: (typeof process !== 'undefined' && process.env?.GITHUB_TOKEN) ?? "", // 留空则使用匿名访问（有API限制）
 
 			// API请求配置
 			cacheTime: 3600, // 缓存时间（秒），避免频繁请求
@@ -164,7 +164,7 @@ export const githubHeatmapConfig = {
 		// 本地Git配置（当source为'local-git'或'combined'时使用）
 		localGit: {
 			// 本地Git仓库路径
-			repoPath: process.env.LOCAL_GIT_REPO_PATH ?? "/root/git-repos/blog.git",
+			repoPath: (typeof process !== 'undefined' && process.env?.LOCAL_GIT_REPO_PATH) ?? "/root/git-repos/blog.git",
 
 			// 统计天数
 			days: 365,
@@ -278,4 +278,20 @@ export const expressiveCodeConfig: ExpressiveCodeConfig = {
 	// 注意：部分样式（如背景色）已被覆盖，详见 astro.config.mjs 文件。
 	// 请务必选择深色主题，因为本博客主题目前仅支持深色背景。
 	theme: "github-dark", // 代码块高亮主题
+};
+
+// Giscus评论系统配置
+export const giscusConfig = {
+	enable: true, // 是否启用评论系统
+	repo: "Introl-ljl/blog-giscus", // GitHub仓库，格式：用户名/仓库名
+	repoId: "R_kgDOPoN0Dg", // 仓库ID，在GitHub仓库设置中获取
+	category: "General", // 讨论分类
+	categoryId: "DIC_kwDOPoN0Ds4Cu3Tg", // 分类ID
+	mapping: "pathname", // 页面与讨论的映射方式
+	reactionsEnabled: true, // 是否启用反应
+	emitMetadata: false, // 是否发送元数据
+	inputPosition: "bottom", // 输入框位置
+	theme: "preferred_color_scheme", // 主题，跟随系统
+	lang: "zh-CN", // 语言
+	loading: "lazy", // 加载方式
 };

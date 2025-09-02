@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import PostMeta from "../../components/PostMeta.astro";
 import Layout from "../../layouts/Layout.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import Giscus from "../../components/Giscus.astro";
 
 export async function getStaticPaths() {
 	const projects = await getCollection("projects");
@@ -301,6 +302,9 @@ const getStatusColor = (status: string) => {
         </section>
       )}
 
+      <!-- Giscus评论系统 -->
+      <Giscus class="mb-8" />
+      
       <!-- 返回项目列表 -->
       <div class="text-center">
         <a 

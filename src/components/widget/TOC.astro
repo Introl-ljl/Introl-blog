@@ -33,28 +33,47 @@ const maxLevel = siteConfig.toc.depth;
 ---
 {isPostsRoute &&
 <table-of-contents class:list={[className, "group"]}>
-    {headings.filter((heading) => heading.depth < minDepth + maxLevel).map((heading) =>
-            <a href={`#${heading.slug}`} class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl
-        hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2
-    ">
+    {headings.filter((heading) => heading.depth < minDepth + maxLevel).map((heading, index) => {
+        const hasChildren = headings.some((h, i) => i > index && h.depth > heading.depth);
+        const isCollapsible = heading.depth === minDepth + 2;
+        const isChild = heading.depth > minDepth + 2;
+        
+        return <div class:list={["toc-item", {
+            "toc-child": isChild,
+            "hidden": isChild
+        }]} data-parent-depth={heading.depth <= minDepth + 2 ? heading.depth : minDepth + 2}>
+            <a href={`#${heading.slug}`} class:list={["px-2 flex gap-2 relative transition w-full min-h-9 rounded-xl hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2", {
+                "toc-collapsible": isCollapsible && hasChildren
+            }]} data-depth={isCollapsible && hasChildren ? heading.depth : undefined}>
                 <div class:list={["transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold",
                     {
                         "bg-[var(--toc-badge-bg)] text-[var(--btn-content)]": heading.depth == minDepth,
                         "ml-4": heading.depth == minDepth + 1,
                         "ml-8": heading.depth == minDepth + 2,
+                        "ml-12": heading.depth == minDepth + 3,
+                        "ml-16": heading.depth == minDepth + 4,
+                        "ml-20": heading.depth == minDepth + 5,
                     }
-                ]}
-                >
+                ]}>
                     {heading.depth == minDepth && heading1Count++}
                     {heading.depth == minDepth + 1 && <div class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"></div>}
-                    {heading.depth == minDepth + 2 && <div class="transition w-1.5 h-1.5 rounded-sm bg-black/5 dark:bg-white/10"></div>}
+                    {heading.depth == minDepth + 2 && (
+                        <div class="transition w-1.5 h-1.5 rounded-sm bg-black/5 dark:bg-white/10"></div>
+                    )}
+                    {heading.depth == minDepth + 3 && <div class="transition w-1 h-1 rounded-sm bg-black/10 dark:bg-white/20"></div>}
+                    {heading.depth == minDepth + 4 && <div class="transition w-0.5 h-0.5 rounded-sm bg-black/15 dark:bg-white/30"></div>}
+                    {heading.depth == minDepth + 5 && <div class="transition w-0.5 h-0.5 rounded-sm bg-black/20 dark:bg-white/40"></div>}
                 </div>
                 <div class:list={["transition text-sm", {
                     "text-50": heading.depth == minDepth || heading.depth == minDepth + 1,
                     "text-30": heading.depth == minDepth + 2,
+                    "text-25": heading.depth == minDepth + 3,
+                    "text-20": heading.depth == minDepth + 4,
+                    "text-15": heading.depth == minDepth + 5,
                 }]}>{removeTailingHash(heading.text)}</div>
             </a>
-    )}
+        </div>;
+    })}
     <div id="active-indicator" style="opacity: 0" class:list={[{'hidden': headings.length == 0}, "-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-xl transition-all " +
         "group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"]}></div>
 </table-of-contents>}
@@ -200,6 +219,86 @@ class TableOfContents extends HTMLElement {
         return min < value && value < max;
     };
 
+    handleToggleClick = (event: Event) => {
+        const anchor = event.target as HTMLElement;
+        const collapsibleLink = anchor.closest('.toc-collapsible') as HTMLAnchorElement;
+        if (!collapsibleLink) return;
+        
+        // 获取锚点链接，先执行跳转
+        const href = collapsibleLink.getAttribute('href');
+        if (href) {
+            // 执行页面跳转到对应标题位置
+            const targetElement = document.querySelector(href);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // 阻止事件冒泡，但允许默认跳转行为完成后再处理折叠逻辑
+        event.stopPropagation();
+        
+        const depth = parseInt(collapsibleLink.getAttribute('data-depth') || '0');
+        const tocItem = collapsibleLink.closest('.toc-item');
+        if (!tocItem) return;
+        
+        // 找到当前项目后面的所有直接子项目
+        let nextSibling = tocItem.nextElementSibling;
+        const childItems: Element[] = [];
+        
+        while (nextSibling) {
+            if (!nextSibling.classList.contains('toc-item')) {
+                nextSibling = nextSibling.nextElementSibling;
+                continue;
+            }
+            
+            // 获取下一个项目的深度
+            const nextAnchor = nextSibling.querySelector('a[href^="#"]');
+            if (!nextAnchor) break;
+            
+            const nextHref = nextAnchor.getAttribute('href');
+            if (!nextHref) break;
+            
+            // 通过href找到对应的标题深度
+            const nextId = nextHref.substring(1);
+            const nextHeading = this.headings.find(h => {
+                const headingId = h.getAttribute('id');
+                return headingId === nextId;
+            });
+            
+            if (!nextHeading) break;
+            
+            const nextDepth = parseInt(nextHeading.tagName.substring(1)); // H1->1, H2->2, etc.
+            
+            if (nextDepth > depth) {
+                childItems.push(nextSibling);
+                nextSibling = nextSibling.nextElementSibling;
+            } else {
+                break;
+            }
+        }
+        
+        // 切换展开/折叠状态
+        const isExpanded = !collapsibleLink.classList.contains('expanded');
+        collapsibleLink.classList.toggle('expanded', isExpanded);
+        
+        // 不需要旋转图标，因为使用的是圆点
+        
+        // 显示/隐藏子项目
+        childItems.forEach(item => {
+            if (isExpanded) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+                // 如果折叠，也要折叠所有嵌套的子项目
+                const nestedToggle = item.querySelector('.toc-collapsible');
+                if (nestedToggle) {
+                    nestedToggle.classList.remove('expanded');
+                    // 不需要处理图标旋转，因为使用的是圆点
+                }
+            }
+        });
+    };
+
     connectedCallback() {
         // wait for the onload animation to finish, which makes the `getBoundingClientRect` return correct values
         const element = document.querySelector('.prose');
@@ -221,6 +320,12 @@ class TableOfContents extends HTMLElement {
 
         this.tocEl.addEventListener("click", this.handleAnchorClick, {
             capture: true,
+        });
+        
+        // 添加折叠/展开事件监听器
+        const collapsibleLinks = this.tocEl.querySelectorAll('.toc-collapsible');
+        collapsibleLinks.forEach(link => {
+            link.addEventListener('click', this.handleToggleClick);
         });
 
         this.activeIndicator = document.getElementById("active-indicator");
@@ -259,6 +364,12 @@ class TableOfContents extends HTMLElement {
         );
         this.observer.disconnect();
         this.tocEl?.removeEventListener("click", this.handleAnchorClick);
+        
+        // 移除折叠/展开事件监听器
+        const collapsibleLinks = this.tocEl?.querySelectorAll('.toc-collapsible');
+        collapsibleLinks?.forEach(link => {
+            link.removeEventListener('click', this.handleToggleClick);
+        });
     };
 }
 
