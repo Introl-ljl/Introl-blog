@@ -32,7 +32,7 @@ URIs: https://mirrors.tuna.tsinghua.edu.cn/debian
 Suites: trixie trixie-updates trixie-backports
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-​
+
 Types: deb-src
 URIs: https://mirrors.tuna.tsinghua.edu.cn/debian
 Suites: trixie trixie-updates trixie-backports
@@ -45,7 +45,7 @@ URIs: https://security.debian.org/debian-security
 Suites: trixie-security
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-​
+
 # Types: deb-src
 # URIs: https://security.debian.org/debian-security
 # Suites: trixie-security
