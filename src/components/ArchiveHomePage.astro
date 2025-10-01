@@ -454,14 +454,14 @@ const startRow = firstDate.getDay();
     <div class="flex items-center mb-4">
       <Icon name={dataSource === 'local-git' ? 'material-symbols:folder-code-outline' : dataSource === 'combined' ? 'material-symbols:merge-type' : 'fa6-brands:github'} class="w-5 h-5 mr-2 text-[var(--primary)]" />
       <h2 class="text-lg font-semibold text-[var(--primary)]">
-        {dataSource === 'local-git' ? '2025年本地Git提交' : dataSource === 'combined' ? '2025年代码提交统计' : '2025年GitHub提交'}
+        {dataSource === 'local-git' ? `${new Date().getFullYear()}年本地Git提交` : dataSource === 'combined' ? `${new Date().getFullYear()}年代码提交统计` : `${new Date().getFullYear()}年GitHub提交`}
       </h2>
     </div>
     <div class="bg-[var(--btn-plain-bg)] rounded-lg p-4">
       {githubHeatmapConfig.display.showStats && (
         <div class="text-sm text-60 mb-3">
-          <span class="font-medium">{totalCommits} contributions in 2025</span>
-          <span class="ml-2">{totalCommits} 次提交 2025年</span>
+          <span class="font-medium">{totalCommits} contributions in {new Date().getFullYear()}</span>
+          <span class="ml-2">{totalCommits} 次提交 {new Date().getFullYear()}年</span>
         </div>
       )}
       <!-- GitHub 贡献热力图 -->

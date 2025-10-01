@@ -27,7 +27,7 @@ export const siteConfig: SiteConfig = {
 	},
 	toc: {
 		enable: true, // 是否在文章页面显示目录
-		depth: 4, // 目录显示的最大标题层级
+		depth: 2, // 目录显示的最大标题层级
 	},
 	favicon: [
 		// 网站图标配置，留空则使用默认图标
