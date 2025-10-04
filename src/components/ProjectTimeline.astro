@@ -1,0 +1,436 @@
+---
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  project: any;
+  relatedPosts?: any[];
+  className?: string;
+  limit?: number;
+}
+
+const { project, relatedPosts = [], className = "", limit } = Astro.props;
+
+// 简单的Markdown渲染函数
+function renderMarkdown(content: string): string {
+  // 先提取所有代码块，避免被段落处理影响
+  const codeBlocks: string[] = [];
+  let processedContent = content.replace(/```([\s\S]*?)```/g, (match, code) => {
+    const trimmedCode = code.trim();
+    const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+    codeBlocks.push(`<pre><code>${trimmedCode}</code></pre>`);
+    return placeholder;
+  });
+
+  // 处理链接卡片
+  const linkCards: string[] = [];
+  processedContent = processedContent.replace(/\[link-card:([^\]]+)\]/g, (match, slug) => {
+    const placeholder = `__LINK_CARD_${linkCards.length}__`;
+    const targetSlug = slug.trim();
+    const post = relatedPosts.find(p => p.slug === targetSlug);
+    if (post) {
+      linkCards.push(`
+        <div class="link-card my-4 group">
+          <a href="/posts/${post.slug}/" class="block p-4 bg-gradient-to-r from-[var(--card-bg)] to-[var(--btn-regular-bg)] border border-[var(--line-divider)] rounded-xl hover:shadow-lg hover:border-[var(--primary)]/30 transition-all duration-300 transform hover:-translate-y-1">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0" style="margin-top: -20px;">
+                <h4 class="text-base font-bold text-90 group-hover:text-[var(--primary)] transition-colors mb-2 line-clamp-2 leading-tight">
+                  ${post.data.title}
+                </h4>
+                <p class="text-sm text-75 leading-relaxed mb-3 line-clamp-2">
+                  ${post.data.description || post.data.summary || '查看这篇文章的详细内容'}
+                </p>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2 text-xs text-60">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>${new Intl.DateTimeFormat('zh-CN').format(new Date(post.data.published || post.data.pubDate))}</span>
+                  </div>
+                  <div class="flex items-center space-x-1 text-xs text-[var(--primary)] group-hover:text-[var(--primary)]/80 font-medium">
+                    <span>阅读文章</span>
+                    <svg class="w-3 h-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      `);
+    } else {
+      linkCards.push(`
+        <div class="link-card my-4">
+          <div class="p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div class="flex-1" style="margin-top: -20px;">
+                <h4 class="text-base font-bold text-red-800 dark:text-red-200 mb-1 leading-tight">
+                  文章链接错误
+                </h4>
+                <p class="text-sm text-red-600 dark:text-red-400">
+                  找不到文章: <code class="px-1 py-0.5 bg-red-100 dark:bg-red-900/50 rounded text-xs">${targetSlug}</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+    return placeholder;
+  });
+
+  // 处理其他内容
+  processedContent = processedContent
+    // 处理加粗文本
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // 处理行内代码
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    // 处理列表项
+    .replace(/^- (.*$)/gim, '<li>$1</li>')
+    // 包装列表
+    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+    // 处理换行
+    .replace(/\n\n/g, '</p><p>')
+    // 包装段落
+    .replace(/^(.*)$/gm, '<p>$1</p>')
+    // 清理空段落
+    .replace(/<p><\/p>/g, '')
+    // 修复列表嵌套问题
+    .replace(/<p>(<ul>.*<\/ul>)<\/p>/s, '$1')
+    .replace(/<p>(<li>.*<\/li>)<\/p>/g, '$1');
+
+  // 恢复代码块
+  codeBlocks.forEach((codeBlock, index) => {
+    processedContent = processedContent.replace(`<p>__CODE_BLOCK_${index}__</p>`, codeBlock);
+    processedContent = processedContent.replace(`__CODE_BLOCK_${index}__`, codeBlock);
+  });
+
+  // 恢复链接卡片
+  linkCards.forEach((linkCard, index) => {
+    processedContent = processedContent.replace(`<p>__LINK_CARD_${index}__</p>`, linkCard);
+    processedContent = processedContent.replace(`__LINK_CARD_${index}__`, linkCard);
+  });
+
+  return processedContent;
+}
+
+// 时间线项目类型
+interface TimelineItem {
+  id: string;
+  type: 'milestone' | 'post' | 'commit' | 'status' | 'feature';
+  date: Date;
+  title: string;
+  content?: string;
+  url?: string;
+  icon: string;
+  iconColor: string;
+  metadata?: any;
+  author?: {
+    name: string;
+    avatar: string;
+    role: string;
+  };
+}
+
+// 格式化日期
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+};
+
+// 创建时间线数据
+function generateTimelineData(): TimelineItem[] {
+  const timeline: TimelineItem[] = [];
+
+  // 优先使用项目MD文件中的timeline数据
+  if (project.data.timeline && project.data.timeline.length > 0) {
+    console.log('项目timeline数据:', project.data.timeline);
+    project.data.timeline.forEach((item: any, index: number) => {
+      timeline.push({
+        id: `timeline-${index}`,
+        type: item.type || 'milestone',
+        date: new Date(item.date),
+        title: item.title,
+        content: item.content || '',
+        icon: item.icon || 'material-symbols:circle',
+        iconColor: item.iconColor || 'text-gray-500',
+        author: item.author || {
+          name: '开发者',
+          avatar: '/assets/avatars/default.png',
+          role: '项目成员'
+        }
+      });
+    });
+  } else {
+    console.log('没有找到timeline数据，使用默认逻辑');
+    // 其他项目的通用时间线生成逻辑
+
+    // 添加项目启动里程碑
+    if (project.data.startDate) {
+      timeline.push({
+        id: 'start',
+        type: 'milestone',
+        date: new Date(project.data.startDate),
+        title: '项目启动',
+        content: `开始开发「${project.data.title}」项目`,
+        icon: 'material-symbols:rocket-launch',
+        iconColor: 'text-blue-500'
+      });
+    }
+
+    // 添加项目特性里程碑
+    if (project.data.features && project.data.features.length > 0) {
+      // 假设特性是在项目开始后均匀分布实现的
+      const startDate = new Date(project.data.startDate);
+      const endDate = new Date(project.data.lastUpdate);
+      const timespan = endDate.getTime() - startDate.getTime();
+
+      project.data.features.forEach((feature: string, index: number) => {
+        const featureDate = new Date(startDate.getTime() + (timespan / project.data.features.length) * (index + 1));
+
+        timeline.push({
+          id: `feature-${index}`,
+          type: 'feature',
+          date: featureDate,
+          title: '实现新功能',
+          content: feature,
+          icon: 'material-symbols:new-releases',
+          iconColor: 'text-purple-500'
+        });
+      });
+    }
+
+    // 添加最后更新
+    if (project.data.lastUpdate && project.data.lastUpdate !== project.data.startDate) {
+      timeline.push({
+        id: 'last-update',
+        type: 'milestone',
+        date: new Date(project.data.lastUpdate),
+        title: '项目更新',
+        content: `项目进度更新至 ${project.data.progress}%`,
+        icon: 'material-symbols:update',
+        iconColor: 'text-orange-500',
+        metadata: {
+          progress: project.data.progress,
+          status: project.data.status
+        }
+      });
+    }
+  }
+
+  // 不自动添加相关文章到时间线，只使用项目配置文件中的 timeline 数据
+  // 如果需要在时间线中显示文章，请在项目配置文件中使用 [link-card:文章slug] 语法
+
+  // 按时间降序排列
+  timeline.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  // 如果设置了限制，截取指定数量
+  return limit ? timeline.slice(0, limit) : timeline;
+}
+
+const timelineData = generateTimelineData();
+
+// 获取类型对应的样式
+function getTypeStyles(type: string) {
+  const styles = {
+    milestone: {
+      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      borderColor: 'border-blue-200 dark:border-blue-800'
+    },
+    post: {
+      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      borderColor: 'border-green-200 dark:border-green-800'
+    },
+    feature: {
+      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      borderColor: 'border-purple-200 dark:border-purple-800'
+    },
+    status: {
+      bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
+      borderColor: 'border-emerald-200 dark:border-emerald-800'
+    },
+    commit: {
+      bgColor: 'bg-gray-50 dark:bg-gray-900/20',
+      borderColor: 'border-gray-200 dark:border-gray-800'
+    }
+  };
+  return styles[type as keyof typeof styles] || styles.milestone;
+}
+---
+
+<div class={`project-timeline-feed ${className}`}>
+  <div class="space-y-8">
+    {timelineData.map((item, index) => {
+      return (
+        <article class="timeline-post">
+          <!-- 发布者头部 -->
+          <header class="flex items-center mb-4">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mr-3 text-white font-semibold">
+              {item.author?.avatar ? (
+                <img src={item.author.avatar} alt={item.author.name} class="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                item.author?.name?.charAt(0) || '开'
+              )}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center space-x-2">
+                <h3 class="font-semibold text-90">
+                  {item.author?.name || '开发者'}
+                </h3>
+                {item.author?.role && (
+                  <span class="text-sm text-60">
+                    · {item.author.role}
+                  </span>
+                )}
+                <span class={`px-2 py-1 text-xs rounded-full ${
+                  item.type === 'milestone' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                  item.type === 'feature' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                  item.type === 'post' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                  'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                }`}>
+                  {item.type === 'post' ? '文章' :
+                   item.type === 'milestone' ? '里程碑' :
+                   item.type === 'feature' ? '功能' :
+                   item.type === 'status' ? '状态' : '提交'}
+                </span>
+              </div>
+              <time class="text-sm text-60">
+                {formatDate(item.date)}
+              </time>
+            </div>
+          </header>
+
+          <!-- 动态内容 -->
+          <div class="ml-13">
+            <h4 class="text-lg font-medium text-90 mb-3">
+              {item.title}
+            </h4>
+
+            {item.content && (
+              <div class="prose prose-sm max-w-none text-75 leading-relaxed mb-6">
+                <Fragment set:html={renderMarkdown(item.content)} />
+              </div>
+            )}
+          </div>
+
+          <!-- 分割线 -->
+          {index < timelineData.length - 1 && (
+            <div class="border-t border-[var(--line-divider)] mt-8"></div>
+          )}
+        </article>
+      );
+    })}
+  </div>
+
+  <!-- 空状态 -->
+  {timelineData.length === 0 && (
+    <div class="text-center py-12">
+      <Icon name="material-symbols:timeline" class="w-12 h-12 text-50 mx-auto mb-3" />
+      <p class="text-75">暂无项目动态</p>
+      <p class="text-sm text-50 mt-1">项目时间线将展示开发进展和重要里程碑</p>
+    </div>
+  )}
+</div>
+
+<style>
+  .project-timeline-feed {
+    max-width: 100%;
+  }
+
+  .timeline-post {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .ml-13 {
+    margin-left: 3.25rem; /* 头像宽度 + 间距 */
+  }
+
+  .prose {
+    color: var(--text-75);
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: var(--text-90);
+    margin-bottom: 0.5em;
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+  }
+
+  .prose ul, .prose ol {
+    margin: 1em 0;
+    padding-left: 1.5em;
+  }
+
+  .prose li {
+    margin-bottom: 0.5em;
+  }
+
+  .prose code {
+    background: var(--btn-regular-bg);
+    color: var(--primary);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 1em;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  }
+
+  .prose pre {
+    background: var(--btn-plain-bg);
+    border: 1px solid var(--line-divider);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1em 0;
+    font-size: 1em;
+    line-height: 1.2;
+    white-space: pre-wrap;
+  }
+
+  .prose pre code {
+    background: none;
+    color: var(--text-90);
+    padding: 0;
+    font-size: inherit;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  }
+
+  .prose strong {
+    color: var(--text-90);
+    font-weight: 600;
+  }
+
+  .prose blockquote {
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+    margin: 1em 0;
+    font-style: italic;
+    color: var(--text-60);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>

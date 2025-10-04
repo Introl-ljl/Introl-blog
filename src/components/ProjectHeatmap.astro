@@ -1,0 +1,467 @@
+---
+export interface Props {
+  project: any;
+  relatedPosts?: any[];
+  className?: string;
+  layout?: 'horizontal' | 'vertical';
+}
+
+const { project, relatedPosts = [], className = "", layout = 'horizontal' } = Astro.props;
+
+// 月份名称
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+// 生成提示信息
+function getTooltip(day: any, date: Date) {
+  const dateStr = date.toISOString().split("T")[0];
+  if (day.type === 'commit') {
+    switch (day.commits) {
+      case 0:
+        return `No commits on ${dateStr}`;
+      case 1:
+        return `1 commit on ${dateStr}`;
+      default:
+        return `${day.commits} commits on ${dateStr}`;
+    }
+  } else if (day.type === 'post') {
+    return day.posts.length > 0
+      ? `${day.posts.length} post(s) published on ${dateStr}: ${day.posts.map(p => p.title).join(', ')}`
+      : `No posts on ${dateStr}`;
+  } else if (day.type === 'milestone') {
+    return day.milestones.length > 0
+      ? `Project milestone on ${dateStr}: ${day.milestones.join(', ')}`
+      : `No activity on ${dateStr}`;
+  }
+  return `No activity on ${dateStr}`;
+}
+
+// 本地Git提交数据获取函数
+async function fetchLocalGitContributions() {
+  try {
+    // 导入本地Git统计工具
+    const { fetchLocalGitStats } = await import('../utils/git-stats');
+
+    const config = {
+      repoPath: './.git', // 修正Git目录路径
+      days: 12 * 7, // 12周
+      author: undefined // 获取所有作者的提交
+    };
+
+    const gitData = await fetchLocalGitStats(config);
+    console.log('Local git data loaded:', gitData?.length, 'days');
+    return gitData;
+  } catch (error) {
+    console.warn('Failed to fetch local git data:', error);
+    return null;
+  }
+}
+
+// GitHub API数据获取函数（保留作为备用）
+async function fetchProjectGitHubContributions(githubUrl: string) {
+  if (!githubUrl || githubUrl === '.') {
+    // 如果是本地项目，使用本地Git数据
+    return await fetchLocalGitContributions();
+  }
+
+  // 从GitHub URL提取用户名和仓库名
+  const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (!match) return null;
+
+  const [, owner, repo] = match;
+
+  try {
+    // 获取仓库提交历史（简化版本，实际需要GitHub token）
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`, {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        // 'Authorization': `token ${process.env.GITHUB_TOKEN}` // 需要时添加
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const commits = await response.json();
+
+    // 获取最后一次提交的时间
+    const lastCommitDate = commits.length > 0 ? new Date(commits[0].commit.author.date) : new Date();
+
+    // 生成从最后一次提交往前12周的数据
+    const endDate = new Date(lastCommitDate);
+    const endDateDay = endDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    // 调整到本周的星期天
+    const endSunday = new Date(endDate);
+    endSunday.setDate(endDate.getDate() + (7 - endDateDay) % 7);
+
+    // 往前推12周到开始日期
+    const startDate = new Date(endSunday);
+    startDate.setDate(endSunday.getDate() - 12 * 7 + 1);
+
+    const data = [];
+
+    for (let i = 0; i < 12 * 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      // 计算当天的提交数
+      const dayCommits = commits.filter((commit: any) => {
+        const commitDate = new Date(commit.commit.author.date).toISOString().split('T')[0];
+        return commitDate === dateStr;
+      }).length;
+
+      let intensity = 0;
+      if (dayCommits === 0) intensity = 0;
+      else if (dayCommits <= 2) intensity = 1;
+      else if (dayCommits <= 4) intensity = 2;
+      else if (dayCommits <= 6) intensity = 3;
+      else intensity = 4;
+
+      data.push({
+        date: dateStr,
+        intensity,
+        commits: dayCommits,
+        type: 'commit'
+      });
+    }
+
+    return data;
+  } catch (error) {
+    console.warn('Failed to fetch GitHub data for project:', error);
+    return null;
+  }
+}
+
+// 基于项目时间线生成热力图数据
+function generateProjectTimelineData() {
+  // 使用项目的最后更新时间作为结束点
+  const endDate = project.data.lastUpdate ? new Date(project.data.lastUpdate) : new Date();
+  const endDateDay = endDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+  // 调整到本周的星期天
+  const endSunday = new Date(endDate);
+  endSunday.setDate(endDate.getDate() + (7 - endDateDay) % 7);
+
+  // 往前推12周到开始日期
+  const startDate = new Date(endSunday);
+  startDate.setDate(endSunday.getDate() - 12 * 7 + 1);
+
+  const data = [];
+
+  for (let i = 0; i < 12 * 7; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    data.push({
+      date: dateStr,
+      intensity: 0,
+      posts: [],
+      milestones: [],
+      type: 'post'
+    });
+  }
+
+  // 添加项目相关文章的发布日期
+  relatedPosts.forEach((post: any) => {
+    const postDate = new Date(post.data.published || post.data.pubDate);
+    const dateStr = postDate.toISOString().split('T')[0];
+
+    const dayData = data.find(d => d.date === dateStr);
+    if (dayData) {
+      dayData.posts.push({
+        title: post.data.title,
+        slug: post.slug
+      });
+      dayData.intensity = Math.min(4, dayData.posts.length);
+    }
+  });
+
+  // 添加项目里程碑（基于项目开始时间和更新时间）
+  if (project.data.startDate) {
+    const startDate = new Date(project.data.startDate).toISOString().split('T')[0];
+    const startDayData = data.find(d => d.date === startDate);
+    if (startDayData) {
+      startDayData.milestones.push('项目启动');
+      startDayData.intensity = Math.max(startDayData.intensity, 2);
+      startDayData.type = 'milestone';
+    }
+  }
+
+  if (project.data.lastUpdate) {
+    const updateDate = new Date(project.data.lastUpdate).toISOString().split('T')[0];
+    const updateDayData = data.find(d => d.date === updateDate);
+    if (updateDayData && updateDate !== new Date(project.data.startDate).toISOString().split('T')[0]) {
+      updateDayData.milestones.push('最新更新');
+      updateDayData.intensity = Math.max(updateDayData.intensity, 1);
+      updateDayData.type = 'milestone';
+    }
+  }
+
+  return data;
+}
+
+// 生成月份标签
+function generateMonthLabels(contributions: any[], layout: string) {
+  if (layout === 'vertical') {
+    // 竖版布局：生成简化的月份标签
+    const months: Array<{ name: string; gridRow: number; key: number }> = [];
+    let latestMonth = -1;
+
+    contributions.forEach((c: any, i: number) => {
+      const date = new Date(c.date);
+      const month = date.getMonth();
+
+      // 每月第一天或每15天添加一个标签
+      if (month !== latestMonth && date.getDate() <= 7) {
+        const gridRow = Math.floor(i / 10) + 2;
+        latestMonth = month;
+        months.push({
+          name: MONTHS[month],
+          gridRow: gridRow,
+          key: i,
+        });
+      }
+    });
+
+    return months.filter((_, index) => index % 2 === 0); // 只显示每隔一个月
+  } else {
+    // 水平布局：原有逻辑
+    const firstDate = new Date(contributions[0].date);
+    const startRow = firstDate.getDay();
+    const months: Array<{ name: string; gridColumn: number; key: number }> = [];
+    let latestMonth = -1;
+
+    contributions.forEach((c: any, i: number) => {
+      const date = new Date(c.date);
+      const month = date.getMonth();
+
+      if (date.getDay() === 0 && month !== latestMonth) {
+        const gridColumn = 2 + Math.floor((i + startRow) / 7);
+        latestMonth = month;
+        months.push({
+          name: MONTHS[month],
+          gridColumn: gridColumn,
+          key: i,
+        });
+      }
+    });
+
+    // 处理边界情况
+    if (months.length > 0) {
+      if (MONTHS[firstDate.getMonth()] === months[0].name) {
+        months[0].gridColumn = 2;
+      }
+
+      if (months.length > 1 && months[1].gridColumn - months[0].gridColumn < 3) {
+        months.shift();
+      }
+
+      if (months[months.length - 1].gridColumn > 53) {
+        months.pop();
+      }
+    }
+
+    return months;
+  }
+}
+
+// 确定数据源和获取数据
+let heatmapData: any[];
+let dataSourceType = 'timeline';
+
+// 优先使用GitHub数据（如果有GitHub链接且不是本地项目）
+if (project.data.links?.github && project.data.links.github !== '.') {
+  console.log('Trying GitHub data for:', project.data.links.github);
+  const githubData = await fetchProjectGitHubContributions(project.data.links.github);
+  if (githubData) {
+    heatmapData = githubData;
+    dataSourceType = 'github';
+  } else {
+    heatmapData = generateProjectTimelineData();
+  }
+} else if (project.data.links?.github === '.') {
+  // 尝试本地Git数据
+  console.log('Trying local Git data');
+  const localGitData = await fetchLocalGitContributions();
+  if (localGitData && localGitData.length > 0) {
+    heatmapData = localGitData;
+    dataSourceType = 'git';
+  } else {
+    console.log('Falling back to timeline data');
+    heatmapData = generateProjectTimelineData();
+  }
+} else {
+  // 使用项目时间线数据
+  console.log('Using timeline data');
+  heatmapData = generateProjectTimelineData();
+}
+
+// 计算统计信息
+const totalActivity = dataSourceType === 'github' || dataSourceType === 'git'
+  ? heatmapData.reduce((sum: number, day: any) => sum + (day.commits || 0), 0)
+  : heatmapData.reduce((sum: number, day: any) => sum + (day.posts?.length || 0) + (day.milestones?.length || 0), 0);
+
+const monthLabels = generateMonthLabels(heatmapData, layout);
+const firstDate = new Date(heatmapData[0].date);
+const startRow = firstDate.getDay();
+---
+
+<div class={`project-heatmap ${className}`}>
+  <div class="bg-[var(--btn-plain-bg)] rounded-lg p-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="text-sm text-60">
+        <span class="font-medium">
+          {dataSourceType === 'github' || dataSourceType === 'git' ? `${totalActivity} commits` : `${totalActivity} activities`}
+        </span>
+        <span class="ml-2">
+          {dataSourceType === 'github' || dataSourceType === 'git' ? '代码提交' : '项目活动'}
+        </span>
+      </div>
+      <div class="text-xs text-50 px-2 py-1 bg-[var(--card-bg)] rounded">
+        {dataSourceType === 'github' ? 'GitHub' : dataSourceType === 'git' ? 'Git' : '时间线'}
+      </div>
+    </div>
+
+    <!-- 热力图容器 -->
+    <div class="github-heatmap w-full">
+      <div class="relative overflow-hidden">
+        {layout === 'vertical' ? (
+          <!-- 竖版布局 -->
+          <div class="grid w-full" style="grid-template-columns: auto repeat(10, minmax(0, 1fr)); grid-template-rows: auto repeat(12, minmax(0, 1fr)); gap: 1px;">
+
+            <!-- 星期标签 -->
+            <span class="text-xs text-50 text-center" style="grid-column: 2; grid-row: 1;">M</span>
+            <span class="text-xs text-50 text-center" style="grid-column: 4; grid-row: 1;">W</span>
+            <span class="text-xs text-50 text-center" style="grid-column: 6; grid-row: 1;">F</span>
+            <span class="text-xs text-50 text-center" style="grid-column: 8; grid-row: 1;">S</span>
+            <span class="text-xs text-50 text-center" style="grid-column: 10; grid-row: 1;">T</span>
+
+            <!-- 月份标签 -->
+            {monthLabels.map((month: any) => (
+              <span
+                class="text-xs text-50 text-right pr-1"
+                style={`grid-column: 1; grid-row: ${month.gridRow};`}
+              >
+                {month.name}
+              </span>
+            ))}
+
+            <!-- 热力图网格 -->
+            {heatmapData.map((day: any, index: number) => {
+              // 颜色方案
+              const lightColors = {
+                0: 'bg-gray-100 dark:bg-gray-800',
+                1: 'bg-green-100 dark:bg-green-900',
+                2: 'bg-green-200 dark:bg-green-800',
+                3: 'bg-green-300 dark:bg-green-700',
+                4: 'bg-green-400 dark:bg-green-600'
+              };
+
+              const cellColor = lightColors[day.intensity as keyof typeof lightColors] || lightColors[0];
+
+              const date = new Date(day.date);
+              const weekIndex = Math.floor((index + startRow) / 10);
+              const dayOfWeek = (index + startRow) % 10;
+
+              const gridColumn = 2 + dayOfWeek;
+              const gridRow = 2 + weekIndex;
+
+              return (
+                <div
+                  class={`w-4 h-4 rounded-sm ${cellColor} hover:ring-1 hover:ring-[var(--primary)] transition-all cursor-help`}
+                  style={`grid-column: ${gridColumn}; grid-row: ${gridRow};`}
+                  title={getTooltip(day, date)}
+                ></div>
+              );
+            })}
+          </div>
+        ) : (
+          <!-- 水平布局 -->
+          <div class="grid w-full" style="grid-template-columns: auto repeat(12, 1fr); grid-template-rows: auto repeat(7, 1fr); gap: 3px; max-width: 100%;">
+
+            <!-- 月份标签 -->
+            {monthLabels.map((month: any) => (
+              <span
+                class="text-xs text-50 text-center"
+                style={`grid-column: ${month.gridColumn}; grid-row: 1;`}
+              >
+                {month.name}
+              </span>
+            ))}
+
+            <!-- 星期标签 -->
+            <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 2;">Sun</span>
+            <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 4;">Tue</span>
+            <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 6;">Thu</span>
+            <span class="text-xs text-50 text-right pr-1" style="grid-column: 1; grid-row: 8;">Sat</span>
+
+            <!-- 热力图网格 -->
+            {heatmapData.map((day: any, index: number) => {
+              // 颜色方案
+              const lightColors = {
+                0: 'bg-gray-100 dark:bg-gray-800',
+                1: 'bg-green-100 dark:bg-green-900',
+                2: 'bg-green-200 dark:bg-green-800',
+                3: 'bg-green-300 dark:bg-green-700',
+                4: 'bg-green-400 dark:bg-green-600'
+              };
+
+              const cellColor = lightColors[day.intensity as keyof typeof lightColors] || lightColors[0];
+
+              const date = new Date(day.date);
+              const weekNumber = Math.floor(index / 7);
+              const dayOfWeek = index % 7;
+
+              const gridColumn = 2 + weekNumber;
+              const gridRow = 2 + dayOfWeek;
+
+              const style = `grid-column: ${gridColumn}; grid-row: ${gridRow};`;
+
+              return (
+                <div
+                  class={`w-4 h-4 rounded-sm ${cellColor} hover:ring-1 hover:ring-[var(--primary)] transition-all cursor-help`}
+                  style={style}
+                  title={getTooltip(day, date)}
+                ></div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <!-- 图例 -->
+      <div class={`flex items-center ${layout === 'vertical' ? 'justify-center' : 'justify-end'} mt-2 text-xs text-50`}>
+        <span class="mr-2">Less</span>
+        <div class="flex items-center space-x-2">
+          <div class="w-4 h-4 rounded-sm bg-gray-100 dark:bg-gray-800"></div>
+          <div class="w-4 h-4 rounded-sm bg-green-100 dark:bg-green-900"></div>
+          <div class="w-4 h-4 rounded-sm bg-green-200 dark:bg-green-800"></div>
+          <div class="w-4 h-4 rounded-sm bg-green-300 dark:bg-green-700"></div>
+          <div class="w-4 h-4 rounded-sm bg-green-400 dark:bg-green-600"></div>
+        </div>
+        <span class="ml-2">More</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .project-heatmap .github-heatmap {
+    font-size: 0.75rem;
+  }
+
+  .project-heatmap .grid > div {
+    transition: all 0.2s ease;
+  }
+
+  .project-heatmap .grid > div:hover {
+    transform: scale(1.2);
+    z-index: 10;
+  }
+</style>

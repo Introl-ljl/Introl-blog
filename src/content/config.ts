@@ -82,6 +82,20 @@ const projectsCollection = defineCollection({
 			forks: z.number().optional().default(0),
 			downloads: z.number().optional().default(0),
 		}).optional().default({}),
+		// 项目时间线
+		timeline: z.array(z.object({
+			date: z.string(), // ISO 8601 格式时间字符串
+			type: z.enum(["milestone", "feature", "post", "commit", "status"]).optional().default("milestone"),
+			title: z.string(),
+			content: z.string().optional().default(""),
+			icon: z.string().optional().default("material-symbols:circle"),
+			iconColor: z.string().optional().default("text-gray-500"),
+			author: z.object({
+				name: z.string().optional().default("开发者"),
+				avatar: z.string().optional().default(""),
+				role: z.string().optional().default("")
+			}).optional().default({})
+		})).optional().default([]),
 		draft: z.boolean().optional().default(false),
 	}),
 });

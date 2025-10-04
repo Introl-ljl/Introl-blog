@@ -4,6 +4,8 @@ import Layout from "../layouts/Layout.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
 import ProjectCard from "../components/ProjectCard.astro";
+import ProjectHeatmap from "../components/ProjectHeatmap.astro";
+import ProjectTimeline from "../components/ProjectTimeline.astro";
 import StatusBadge from "../components/StatusBadge.astro";
 import ProgressBar from "../components/ProgressBar.astro";
 import { Icon } from "astro-icon/components";
@@ -92,10 +94,10 @@ const getStatusColor = (status: string) => {
 
 <Layout title="项目展示">
   <MainGridLayout>
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- 页面标题 -->
       <header class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 class="text-4xl font-bold text-90 mb-4">
           项目展示
         </h1>
         <p class="text-lg text-75 max-w-2xl mx-auto">
@@ -103,305 +105,44 @@ const getStatusColor = (status: string) => {
         </p>
       </header>
 
+      <!-- 项目展示 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projectsWithPosts.map((project: any) => (
+          <div class="card-base hover:shadow-lg transition-all duration-300 overflow-hidden">
+            <div class="p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <h3 class="text-xl font-bold text-90 flex-1">
+                  <a href={`/projects/${project.slug}/`} class="hover:text-[var(--primary)] transition-colors">
+                    {project.data.title}
+                  </a>
+                </h3>
+                <StatusBadge status={project.data.status} />
+              </div>
 
+              <p class="text-75 mb-4 leading-relaxed">
+                {project.data.description}
+              </p>
 
-      <!-- 视图切换按钮 -->
-      <div class="flex justify-center mb-8">
-        <div class="bg-[var(--btn-regular-bg)] rounded-lg p-1">
-          <button 
-            id="category-view-btn"
-            class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-[var(--card-bg)] text-90 shadow-sm"
-          >
-            分类视图
-          </button>
-          <button 
-            id="timeline-view-btn"
-            class="px-4 py-2 rounded-md text-sm font-medium transition-colors text-60 hover:text-90"
-          >
-            时间线视图
-          </button>
-        </div>
-      </div>
+              <div class="flex items-center justify-between text-sm text-60">
+                <span>{new Intl.DateTimeFormat('zh-CN').format(new Date(project.data.lastUpdate))}</span>
+                <span>{project.data.progress}% 完成</span>
+              </div>
 
-      <!-- 分类视图 -->
-      <div id="category-view" class="space-y-12">
-        {categories.map((category) => (
-          <section data-category={category}>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <span class="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
-              {category}
-              <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-                ({projectsByCategory[category].length})
-              </span>
-            </h2>
-            <div class="space-y-8">
-              {projectsByCategory[category].map((project: any) => (
-                <div class="bg-[var(--card-bg)] rounded-lg shadow-lg overflow-hidden border border-[var(--line-divider)]">
-                  <!-- 项目信息区域 -->
-                  <div class="p-6 border-b border-[var(--line-divider)]">
-                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-3">
-                          <h3 class="text-xl font-bold text-90">
-                            <a href={`/projects/${project.slug}/`} class="hover:text-[var(--primary)] transition-colors">
-                              {project.data.title}
-                            </a>
-                          </h3>
-                          <StatusBadge status={project.data.status} />
-                        </div>
-                        <p class="text-75 mb-4">{project.data.description}</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                          {project.data.tags?.map((tag: string) => (
-                            <span class="px-2 py-1 bg-[var(--btn-regular-bg)] text-[var(--btn-content)] text-xs rounded-full">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <div class="space-y-3">
-                          <div class="flex items-center text-sm text-50">
-                            <Icon name="material-symbols:schedule" class="w-4 h-4 mr-2" />
-                            <span>最后更新: {formatDate(project.data.lastUpdate)}</span>
-                          </div>
-                          {project.data.progress && (
-                            <div class="space-y-2">
-                              <div class="flex items-center justify-between text-sm">
-                                <span class="text-60">项目进度</span>
-                                <span class="font-medium text-90">{project.data.progress}%</span>
-                              </div>
-                              <ProgressBar progress={project.data.progress} showLabel={false} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div class="flex gap-2">
-                        {project.data.links?.github && (
-                          <a href={project.data.links.github} target="_blank" rel="noopener noreferrer" 
-                             class="px-3 py-2 bg-[var(--btn-regular-bg)] text-[var(--btn-content)] rounded-md hover:bg-[var(--btn-regular-bg-hover)] transition-colors text-sm">
-                            <Icon name="fa6-brands:github" class="w-4 h-4 inline mr-1" />
-                            GitHub
-                          </a>
-                        )}
-                        {project.data.links?.demo && (
-                          <a href={project.data.links.demo} target="_blank" rel="noopener noreferrer"
-                             class="px-3 py-2 bg-[var(--primary)] text-white rounded-md hover:bg-[var(--primary)]/90 transition-colors text-sm">
-                            <Icon name="material-symbols:open-in-new" class="w-4 h-4 inline mr-1" />
-                            演示
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- 关联文章区域 -->
-                  {project.relatedPosts.length > 0 && (
-                    <div class="p-6">
-                      <h4 class="text-lg font-semibold text-90 mb-4 flex items-center">
-                        <Icon name="material-symbols:description" class="w-5 h-5 mr-2 text-[var(--primary)]" />
-                        相关文章 ({project.relatedPosts.length})
-                      </h4>
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {project.relatedPosts.map((post: any) => (
-                          <a href={`/posts/${post.slug}/`} 
-                             class="block p-4 bg-[var(--btn-regular-bg)] rounded-lg hover:bg-[var(--btn-regular-bg-hover)] transition-colors group">
-                            <h5 class="font-medium text-90 group-hover:text-[var(--primary)] mb-2">
-                              {post.data.title}
-                            </h5>
-                            <div class="flex items-center justify-between text-sm text-50">
-                              <span class="flex items-center">
-                                <Icon name="material-symbols:calendar-today" class="w-4 h-4 mr-1" />
-                                {formatDate(post.data.pubDate)}
-                              </span>
-                              {post.data.tags && post.data.tags.length > 0 && (
-                                <div class="flex gap-1">
-                                  {post.data.tags.slice(0, 2).map((tag: string) => (
-                                    <span class="px-2 py-0.5 bg-[var(--btn-card-bg-hover)] text-[var(--btn-content)] text-xs rounded">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                  {post.data.tags.length > 2 && (
-                                    <span class="text-xs text-30">+{post.data.tags.length - 2}</span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {project.relatedPosts.length === 0 && (
-                    <div class="p-6 text-center text-50">
-                      <Icon name="material-symbols:description-outline" class="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p class="text-sm">暂无相关文章</p>
-                    </div>
-                  )}
-                </div>
-              ))}
+              <div class="mt-4 pt-4 border-t border-[var(--line-divider)]">
+                <a
+                  href={`/projects/${project.slug}/`}
+                  class="inline-flex items-center text-sm text-[var(--primary)] hover:text-[var(--primary)]/80 transition-colors"
+                >
+                  查看详情
+                  <Icon name="material-symbols:arrow-forward" class="w-4 h-4 ml-1" />
+                </a>
+              </div>
             </div>
-          </section>
+          </div>
         ))}
       </div>
 
-      <!-- 时间线视图 -->
-      <div id="timeline-view" class="hidden space-y-12">
-        {years.map((year) => (
-          <section data-year={year}>
-            <h2 class="text-2xl font-bold text-90 mb-6 flex items-center">
-              <span class="w-1 h-6 bg-[var(--primary)] rounded-full mr-3"></span>
-              {year} 年
-              <span class="ml-2 text-sm font-normal text-50">
-                ({projectsByYear[year].length} 个项目)
-              </span>
-            </h2>
-            <div class="space-y-8">
-              {projectsByYear[year].map((project: any) => (
-                <div class="bg-[var(--card-bg)] rounded-lg shadow-lg overflow-hidden border border-[var(--line-divider)]">
-                  <!-- 项目信息区域 -->
-                  <div class="p-6 border-b border-[var(--line-divider)]">
-                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-3">
-                          <h3 class="text-xl font-bold text-90">
-                            <a href={`/projects/${project.slug}/`} class="hover:text-[var(--primary)] transition-colors">
-                              {project.data.title}
-                            </a>
-                          </h3>
-                          <StatusBadge status={project.data.status} />
-                        </div>
-                        <p class="text-75 mb-4">{project.data.description}</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                          {project.data.tags?.map((tag: string) => (
-                            <span class="px-2 py-1 bg-[var(--btn-regular-bg)] text-[var(--btn-content)] text-xs rounded-full">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <div class="space-y-3">
-                          <div class="flex items-center text-sm text-50">
-                            <Icon name="material-symbols:schedule" class="w-4 h-4 mr-2" />
-                            <span>最后更新: {formatDate(project.data.lastUpdate)}</span>
-                          </div>
-                          {project.data.progress && (
-                            <div class="space-y-2">
-                              <div class="flex items-center justify-between text-sm">
-                                <span class="text-60">项目进度</span>
-                                <span class="font-medium text-90">{project.data.progress}%</span>
-                              </div>
-                              <ProgressBar progress={project.data.progress} showLabel={false} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div class="flex gap-2">
-                        {project.data.links?.github && (
-                          <a href={project.data.links.github} target="_blank" rel="noopener noreferrer" 
-                             class="px-3 py-2 bg-[var(--btn-regular-bg)] text-[var(--btn-content)] rounded-md hover:bg-[var(--btn-regular-bg-hover)] transition-colors text-sm">
-                            <Icon name="fa6-brands:github" class="w-4 h-4 inline mr-1" />
-                            GitHub
-                          </a>
-                        )}
-                        {project.data.links?.demo && (
-                          <a href={project.data.links.demo} target="_blank" rel="noopener noreferrer"
-                             class="px-3 py-2 bg-[var(--primary)] text-white rounded-md hover:bg-[var(--primary)] hover:opacity-80 transition-all text-sm">
-                            <Icon name="material-symbols:open-in-new" class="w-4 h-4 inline mr-1" />
-                            演示
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- 关联文章区域 -->
-                  {project.relatedPosts.length > 0 && (
-                    <div class="p-6">
-                      <h4 class="text-lg font-semibold text-90 mb-4 flex items-center">
-                        <Icon name="material-symbols:description" class="w-5 h-5 mr-2 text-[var(--primary)]" />
-                        相关文章 ({project.relatedPosts.length})
-                      </h4>
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {project.relatedPosts.map((post: any) => (
-                          <a href={`/posts/${post.slug}/`} 
-                             class="block p-4 bg-[var(--btn-regular-bg)] rounded-lg hover:bg-[var(--btn-regular-bg-hover)] transition-colors group">
-                            <h5 class="font-medium text-90 group-hover:text-[var(--primary)] mb-2">
-                              {post.data.title}
-                            </h5>
-                            <div class="flex items-center justify-between text-sm text-50">
-                              <span class="flex items-center">
-                                <Icon name="material-symbols:calendar-today" class="w-4 h-4 mr-1" />
-                                {formatDate(post.data.pubDate)}
-                              </span>
-                              {post.data.tags && post.data.tags.length > 0 && (
-                                <div class="flex gap-1">
-                                  {post.data.tags.slice(0, 2).map((tag: string) => (
-                                    <span class="px-2 py-0.5 bg-[var(--btn-card-bg-hover)] text-[var(--btn-content)] text-xs rounded">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                  {post.data.tags.length > 2 && (
-                                    <span class="text-xs text-30">+{post.data.tags.length - 2}</span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {project.relatedPosts.length === 0 && (
-                    <div class="p-6 text-center text-gray-500 dark:text-gray-400">
-                      <Icon name="material-symbols:description-outline" class="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p class="text-sm">暂无相关文章</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
     </div>
   </MainGridLayout>
 </Layout>
 
-  <script>
-    // 视图切换逻辑
-    document.addEventListener('DOMContentLoaded', () => {
-      const categoryViewBtn = document.getElementById('category-view-btn') as HTMLButtonElement;
-      const timelineViewBtn = document.getElementById('timeline-view-btn') as HTMLButtonElement;
-      const categoryView = document.getElementById('category-view') as HTMLElement;
-      const timelineView = document.getElementById('timeline-view') as HTMLElement;
-      
-      // 视图切换功能
-      categoryViewBtn?.addEventListener('click', () => {
-        categoryView.classList.remove('hidden');
-        timelineView.classList.add('hidden');
-        
-        // 激活分类视图按钮
-        categoryViewBtn.classList.remove('text-60');
-        categoryViewBtn.classList.add('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
-        
-        // 取消激活时间线视图按钮
-        timelineViewBtn.classList.remove('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
-        timelineViewBtn.classList.add('text-60');
-      });
-      
-      timelineViewBtn?.addEventListener('click', () => {
-        timelineView.classList.remove('hidden');
-        categoryView.classList.add('hidden');
-        
-        // 激活时间线视图按钮
-        timelineViewBtn.classList.remove('text-60');
-        timelineViewBtn.classList.add('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
-        
-        // 取消激活分类视图按钮
-        categoryViewBtn.classList.remove('bg-[var(--card-bg)]', 'text-90', 'shadow-sm');
-        categoryViewBtn.classList.add('text-60');
-      });
-      
-
-    });
-  </script>
-</MainGridLayout>

@@ -4,7 +4,7 @@ published: 2024-10-10
 description: 在dp学习过程中的一些理解及总结，长期更新。
 tags: ['算法', '动态规划dp', '学习记录']
 category: OI学习笔记
-project: project3
+project: 博客开发
 draft: false
 ---
 # 关键点
