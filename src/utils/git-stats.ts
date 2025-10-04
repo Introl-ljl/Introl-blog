@@ -29,10 +29,16 @@ export async function fetchLocalGitStats(
 ): Promise<GitCommitData[]> {
 	const { repoPath, days = 365, author } = config;
 
+	// 在生产环境中直接返回空数据，避免服务器环境问题
+	if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+		console.log('Production environment detected, skipping git stats');
+		return generateEmptyData(days);
+	}
+
 	// 检查仓库路径是否存在
 	if (!existsSync(repoPath)) {
 		console.warn(`Git repository not found at: ${repoPath}`);
-		return [];
+		return generateEmptyData(days);
 	}
 
 	try {
