@@ -86,7 +86,7 @@ const imageStyle = `object-position: ${position}`;
     <div class="transition absolute inset-0 dark:bg-black/10 bg-opacity-50 pointer-events-none"></div>
     {!isRemote && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle}/>}
     {(!img && !isRemote) && (
-        // 本地未匹配到文件时，退化为直接使用传入路径（支持 public/ 下资源或绝对路径），并应用 base url
+        /* 本地未匹配到文件时，退化为直接使用传入路径（支持 public/ 下资源或绝对路径），并应用 base url */
         <img src={url(src)} alt={alt || ""} class={imageClass} style={imageStyle}/>
     )}
     {isRemote && (
