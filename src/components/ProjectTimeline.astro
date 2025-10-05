@@ -1,5 +1,6 @@
 ---
 import { Icon } from 'astro-icon/components';
+import ImageWrapper from "../misc/ImageWrapper.astro";
 
 export interface Props {
   project: any;
@@ -280,9 +281,9 @@ function getTypeStyles(type: string) {
         <article class="timeline-post">
           <!-- 发布者头部 -->
           <header class="flex items-center mb-4">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mr-3 text-white font-semibold">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mr-3 text-white font-semibold overflow-hidden">
               {item.author?.avatar ? (
-                <img src={item.author.avatar} alt={item.author.name} class="w-10 h-10 rounded-full object-cover" />
+                <ImageWrapper src={item.author.avatar} alt={item.author.name} class="w-10 h-10 rounded-full object-cover" />
               ) : (
                 item.author?.name?.charAt(0) || '开'
               )}
