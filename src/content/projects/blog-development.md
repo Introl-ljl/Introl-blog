@@ -15,7 +15,7 @@ status: "进行中"
 contributors:
   - name: "Introl"
     role: "全栈开发"
-    avatar: "assets/images/avatar.png"
+    avatar: "src/assets/images/avatar.png"
 links:
   github: "."
   demo: "/"
@@ -50,7 +50,7 @@ timeline:
     iconColor: "text-orange-600"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "可视化专家"
   - date: "2025-08-20T08:12:44"
     type: "milestone"
@@ -71,7 +71,7 @@ timeline:
     iconColor: "text-blue-500"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "页面架构专家"
   - date: "2025-08-20T10:50:28"
     type: "feature"
@@ -92,7 +92,7 @@ timeline:
     iconColor: "text-yellow-500"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "功能规划专家"
   - date: "2025-08-20T11:19:41"
     type: "feature"
@@ -112,7 +112,7 @@ timeline:
     iconColor: "text-cyan-500"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "社交功能负责人"
   - date: "2025-09-19T14:52:51"
     type: "feature"
@@ -132,7 +132,7 @@ timeline:
     iconColor: "text-green-500"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "性能优化专家"
   - date: "2025-10-01T14:58:38"
     type: "feature"
@@ -153,7 +153,7 @@ timeline:
     iconColor: "text-purple-500"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "界面优化专家"
   - date: "2025-10-01T15:03:36"
     type: "feature"
@@ -180,7 +180,7 @@ timeline:
     iconColor: "text-gray-500"
     author:
       name: "Introl"
-      avatar: "assets/images/avatar.png"
+      avatar: "src/assets/images/avatar.png"
       role: "代码维护专家"
 draft: false
 ---

@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import { existsSync } from "fs";
+import * as path from "path";
 
 /**
  * Git提交数据接口
@@ -25,47 +26,49 @@ export interface GitStatsConfig {
  * @returns 提交数据数组
  */
 export async function fetchLocalGitStats(
-	config: GitStatsConfig,
+    config: GitStatsConfig,
 ): Promise<GitCommitData[]> {
-	const { repoPath, days = 365, author } = config;
+    const { repoPath, days = 365, author } = config;
 
-	// 在生产环境中直接返回空数据，避免服务器环境问题
-	if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
-		console.log('Production environment detected, skipping git stats');
-		return generateEmptyData(days);
-	}
 
-	// 检查仓库路径是否存在
-	if (!existsSync(repoPath)) {
-		console.warn(`Git repository not found at: ${repoPath}`);
-		return generateEmptyData(days);
-	}
+    // 解析与兜底：优先使用传入路径；不存在则尝试当前项目根目录
+    let resolvedRepoPath = repoPath;
+    if (!existsSync(resolvedRepoPath) && !existsSync(path.join(resolvedRepoPath, ".git"))) {
+        const fallbackGitDir = path.join(process.cwd(), ".git");
+        if (existsSync(fallbackGitDir)) {
+            resolvedRepoPath = fallbackGitDir;
+        } else {
+            console.warn(`Git repository not found at: ${repoPath}`);
+            return generateEmptyData(days);
+        }
+    }
 
 	try {
 		// 计算开始日期
 		const endDate = new Date();
-		const startDate = new Date();
-		startDate.setDate(endDate.getDate() - days);
+        const startDate = new Date();
+        // 确保区间包含 endDate 且总天数为 days
+        startDate.setDate(endDate.getDate() - (days - 1));
 
-		const startDateStr = startDate.toISOString().split("T")[0];
-		const endDateStr = endDate.toISOString().split("T")[0];
+        const startDateStr = formatDateLocal(startDate);
+        const endDateStr = formatDateLocal(endDate);
 
-		// 构建git log命令
-		// 如果repoPath是相对路径，直接使用git命令而不指定git-dir
-		let gitCommand;
-		if (repoPath === './.git' || repoPath === '.git') {
-			gitCommand = `git log --since="${startDateStr}" --until="${endDateStr}" --pretty=format:"%ad" --date=short`;
-		} else {
-			gitCommand = `git --git-dir="${repoPath}" log --since="${startDateStr}" --until="${endDateStr}" --pretty=format:"%ad" --date=short`;
-		}
+        // 选择作为工作目录的路径：
+        // - 若传入的是 .git 目录，则取其上级目录作为工作目录
+        // - 若传入的是工作区根目录（包含 .git），则直接作为工作目录
+        // 这样可以避免在 Windows 上对 --git-dir 的复杂转义问题
+        const isGitDir = path.basename(resolvedRepoPath) === ".git";
+        const workDir = isGitDir ? path.resolve(path.dirname(resolvedRepoPath)) : path.resolve(resolvedRepoPath);
 
-		// 如果指定了作者，添加作者过滤
-		if (author) {
-			gitCommand += ` --author="${author}"`;
-		}
+        // 为确保 "endDate" 当天的提交不会被排除，这里不设置 --until，而是只设置 --since
+        // git 的 --since 使用本地时区解析日期字符串
+        let gitCommand = `git log --since="${startDateStr}" --pretty=format:"%ad" --date=short`;
+        if (author) {
+            gitCommand += ` --author="${author}"`;
+        }
 
-		// 执行git命令获取提交日期列表
-		const output = execSync(gitCommand, { encoding: "utf-8" }).trim();
+        // 执行 git 命令获取提交日期列表（在工作目录下执行）
+        const output = execSync(gitCommand, { encoding: "utf-8", cwd: workDir }).trim();
 
 		if (!output) {
 			console.log("No commits found in the specified date range");
@@ -85,10 +88,10 @@ export async function fetchLocalGitStats(
 		const result: GitCommitData[] = [];
 		const currentDate = new Date(startDate);
 
-		while (currentDate <= endDate) {
-			const dateStr = currentDate.toISOString().split("T")[0];
-			const commits = commitCounts.get(dateStr) || 0;
-			const intensity = calculateIntensity(commits);
+        while (currentDate <= endDate) {
+            const dateStr = formatDateLocal(currentDate);
+            const commits = commitCounts.get(dateStr) || 0;
+            const intensity = calculateIntensity(commits);
 
 			result.push({
 				date: dateStr,
@@ -112,11 +115,21 @@ export async function fetchLocalGitStats(
  * @returns 强度等级 (0-4)
  */
 function calculateIntensity(commits: number): number {
-	if (commits === 0) return 0;
-	if (commits <= 2) return 1;
-	if (commits <= 4) return 2;
-	if (commits <= 6) return 3;
-	return 4;
+    if (commits === 0) return 0;
+    if (commits <= 2) return 1;
+    if (commits <= 4) return 2;
+    if (commits <= 6) return 3;
+    return 4;
+}
+
+/**
+ * 以本地时区格式化日期为 YYYY-MM-DD
+ */
+function formatDateLocal(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
 }
 
 /**
@@ -125,20 +138,22 @@ function calculateIntensity(commits: number): number {
  * @returns 空的提交数据数组
  */
 function generateEmptyData(days: number): GitCommitData[] {
-	const result: GitCommitData[] = [];
-	const currentDate = new Date();
-	currentDate.setDate(currentDate.getDate() - days);
+    const result: GitCommitData[] = [];
+    const endDate = new Date();
+    const currentDate = new Date();
+    // 区间与 fetchLocalGitStats 一致：包含今天，总长度为 days
+    currentDate.setDate(endDate.getDate() - (days - 1));
 
-	for (let i = 0; i < days; i++) {
-		result.push({
-			date: currentDate.toISOString().split("T")[0],
-			commits: 0,
-			intensity: 0,
-		});
-		currentDate.setDate(currentDate.getDate() + 1);
-	}
+    for (let i = 0; i < days; i++) {
+        result.push({
+            date: formatDateLocal(currentDate),
+            commits: 0,
+            intensity: 0,
+        });
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
 
-	return result;
+    return result;
 }
 
 /**
@@ -147,38 +162,53 @@ function generateEmptyData(days: number): GitCommitData[] {
  * @returns 统计信息对象
  */
 export async function getGitRepoStats(repoPath: string) {
-	if (!existsSync(repoPath)) {
-		return null;
-	}
+    // 解析与兜底路径
+    let resolvedRepoPath = repoPath;
+    if (!existsSync(resolvedRepoPath) && !existsSync(path.join(resolvedRepoPath, ".git"))) {
+        const fallbackGitDir = path.join(process.cwd(), ".git");
+        if (existsSync(fallbackGitDir)) {
+            resolvedRepoPath = fallbackGitDir;
+        } else {
+            return null;
+        }
+    }
 
-	try {
-		// 根据路径类型选择命令前缀
-		const gitPrefix = (repoPath === './.git' || repoPath === '.git') ? 'git' : `git --git-dir="${repoPath}"`;
+    try {
+        // 解析工作目录（同上逻辑）
+        const isGitDir = path.basename(resolvedRepoPath) === ".git";
+        const workDir = isGitDir ? path.resolve(path.dirname(resolvedRepoPath)) : path.resolve(resolvedRepoPath);
 
-		// 获取总提交数
-		const totalCommits = execSync(
-			`${gitPrefix} rev-list --all --count`,
-			{ encoding: "utf-8" },
-		).trim();
+        // 获取总提交数
+        const totalCommits = execSync(
+            `git rev-list --all --count`,
+            { encoding: "utf-8", cwd: workDir },
+        ).trim();
 
-		// 获取最近提交日期
-		const lastCommitDate = execSync(
-			`${gitPrefix} log -1 --pretty=format:"%ad" --date=short`,
-			{ encoding: "utf-8" },
-		).trim();
+        // 获取最近提交日期
+        const lastCommitDate = execSync(
+            `git log -1 --pretty=format:"%ad" --date=short`,
+            { encoding: "utf-8", cwd: workDir },
+        ).trim();
 
-		// 获取第一次提交日期
-		const firstCommitDate = execSync(
-			`${gitPrefix} log --reverse --pretty=format:"%ad" --date=short | head -1`,
-			{ encoding: "utf-8" },
-		).trim();
+        // 获取第一次提交日期（避免使用 head，在 Windows 上不兼容）
+        const firstHash = execSync(
+            `git rev-list --max-parents=0 HEAD`,
+            { encoding: "utf-8", cwd: workDir },
+        ).split("\n")[0].trim();
 
-		return {
-			totalCommits: Number.parseInt(totalCommits) || 0,
-			lastCommitDate,
-			firstCommitDate,
-			repoPath,
-		};
+        const firstCommitDate = firstHash
+            ? execSync(
+                `git log -1 --pretty=format:"%ad" --date=short ${firstHash}`,
+                { encoding: "utf-8", cwd: workDir },
+            ).trim()
+            : "";
+
+        return {
+            totalCommits: Number.parseInt(totalCommits) || 0,
+            lastCommitDate,
+            firstCommitDate,
+            repoPath,
+        };
 	} catch (error) {
 		console.error("Error getting git repo stats:", error);
 		return null;

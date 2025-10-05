@@ -171,12 +171,14 @@ export default defineConfig({
 			},
 		}),
 	],
-	markdown: {
-		remarkPlugins: [
-			remarkMath,
-			remarkReadingTime,
-			remarkExcerpt,
-			remarkGithubAdmonitionsToDirectives,
+    markdown: {
+        // 使用 astro-expressive-code 处理代码高亮，禁用 Astro 内置 Shiki 以避免额外依赖
+        syntaxHighlight: false,
+        remarkPlugins: [
+            remarkMath,
+            remarkReadingTime,
+            remarkExcerpt,
+            remarkGithubAdmonitionsToDirectives,
 			remarkDirective,
 			remarkSectionize,
 			parseDirectiveNode,
