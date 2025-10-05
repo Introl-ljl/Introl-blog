@@ -1,9 +1,22 @@
 /* Page transition animations with Swup */
+/* Only animate opacity/transform to avoid costly layout thrashing */
 html.is-changing .transition-swup-fade {
-    @apply transition-all duration-200
+    @apply transition-opacity transition-transform duration-150 ease-out;
+    will-change: opacity, transform;
 }
 html.is-animating .transition-swup-fade {
-    @apply opacity-0 translate-y-4
+    @apply opacity-0 translate-y-2;
+}
+
+/* Respect users' reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    html.is-changing .transition-swup-fade {
+        transition: none !important;
+        will-change: auto;
+    }
+    html.is-animating .transition-swup-fade {
+        transform: none !important;
+    }
 }
 
 /* Fade-in animations for components */
