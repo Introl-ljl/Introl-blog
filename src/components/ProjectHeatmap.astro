@@ -40,18 +40,12 @@ function getTooltip(day: any, date: Date) {
 
 // 本地Git提交数据获取函数
 async function fetchLocalGitContributions() {
-  // 在生产环境中禁用Git数据获取，避免服务器环境问题
-  if (import.meta.env.PROD) {
-    console.log('Production environment detected, skipping git data fetch');
-    return null;
-  }
-
   try {
     // 导入本地Git统计工具
     const { fetchLocalGitStats } = await import('../utils/git-stats');
 
     const config = {
-      repoPath: './.git', // 修正Git目录路径
+      repoPath: '.git', // Git目录路径
       days: 12 * 7, // 12周
       author: undefined // 获取所有作者的提交
     };
@@ -298,39 +292,31 @@ function generateMonthLabels(contributions: any[], layout: string) {
 let heatmapData: any[];
 let dataSourceType = 'timeline';
 
-// 在生产环境中，直接使用时间线数据，避免外部依赖问题
-if (import.meta.env.PROD) {
-  console.log('Production environment: Using timeline data');
-  heatmapData = generateProjectTimelineData();
-  dataSourceType = 'timeline';
-} else {
-  // 开发环境中尝试各种数据源
-  // 优先使用GitHub数据（如果有GitHub链接且不是本地项目）
-  if (project.data.links?.github && project.data.links.github !== '.') {
-    console.log('Trying GitHub data for:', project.data.links.github);
-    const githubData = await fetchProjectGitHubContributions(project.data.links.github);
-    if (githubData) {
-      heatmapData = githubData;
-      dataSourceType = 'github';
-    } else {
-      heatmapData = generateProjectTimelineData();
-    }
-  } else if (project.data.links?.github === '.') {
-    // 尝试本地Git数据
-    console.log('Trying local Git data');
-    const localGitData = await fetchLocalGitContributions();
-    if (localGitData && localGitData.length > 0) {
-      heatmapData = localGitData;
-      dataSourceType = 'git';
-    } else {
-      console.log('Falling back to timeline data');
-      heatmapData = generateProjectTimelineData();
-    }
+// 优先使用GitHub数据（如果有GitHub链接且不是本地项目）
+if (project.data.links?.github && project.data.links.github !== '.') {
+  console.log('Trying GitHub data for:', project.data.links.github);
+  const githubData = await fetchProjectGitHubContributions(project.data.links.github);
+  if (githubData) {
+    heatmapData = githubData;
+    dataSourceType = 'github';
   } else {
-    // 使用项目时间线数据
-    console.log('Using timeline data');
     heatmapData = generateProjectTimelineData();
   }
+} else if (project.data.links?.github === '.') {
+  // 尝试本地Git数据
+  console.log('Trying local Git data');
+  const localGitData = await fetchLocalGitContributions();
+  if (localGitData && localGitData.length > 0) {
+    heatmapData = localGitData;
+    dataSourceType = 'git';
+  } else {
+    console.log('Falling back to timeline data');
+    heatmapData = generateProjectTimelineData();
+  }
+} else {
+  // 使用项目时间线数据
+  console.log('Using timeline data');
+  heatmapData = generateProjectTimelineData();
 }
 
 // 计算统计信息

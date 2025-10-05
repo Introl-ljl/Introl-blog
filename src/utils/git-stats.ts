@@ -51,7 +51,13 @@ export async function fetchLocalGitStats(
 		const endDateStr = endDate.toISOString().split("T")[0];
 
 		// 构建git log命令
-		let gitCommand = `git --git-dir="${repoPath}" log --since="${startDateStr}" --until="${endDateStr}" --pretty=format:"%ad" --date=short`;
+		// 如果repoPath是相对路径，直接使用git命令而不指定git-dir
+		let gitCommand;
+		if (repoPath === './.git' || repoPath === '.git') {
+			gitCommand = `git log --since="${startDateStr}" --until="${endDateStr}" --pretty=format:"%ad" --date=short`;
+		} else {
+			gitCommand = `git --git-dir="${repoPath}" log --since="${startDateStr}" --until="${endDateStr}" --pretty=format:"%ad" --date=short`;
+		}
 
 		// 如果指定了作者，添加作者过滤
 		if (author) {
@@ -146,21 +152,24 @@ export async function getGitRepoStats(repoPath: string) {
 	}
 
 	try {
+		// 根据路径类型选择命令前缀
+		const gitPrefix = (repoPath === './.git' || repoPath === '.git') ? 'git' : `git --git-dir="${repoPath}"`;
+
 		// 获取总提交数
 		const totalCommits = execSync(
-			`git --git-dir="${repoPath}" rev-list --all --count`,
+			`${gitPrefix} rev-list --all --count`,
 			{ encoding: "utf-8" },
 		).trim();
 
 		// 获取最近提交日期
 		const lastCommitDate = execSync(
-			`git --git-dir="${repoPath}" log -1 --pretty=format:"%ad" --date=short`,
+			`${gitPrefix} log -1 --pretty=format:"%ad" --date=short`,
 			{ encoding: "utf-8" },
 		).trim();
 
 		// 获取第一次提交日期
 		const firstCommitDate = execSync(
-			`git --git-dir="${repoPath}" log --reverse --pretty=format:"%ad" --date=short | head -1`,
+			`${gitPrefix} log --reverse --pretty=format:"%ad" --date=short | head -1`,
 			{ encoding: "utf-8" },
 		).trim();
 
