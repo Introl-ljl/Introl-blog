@@ -47,7 +47,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-08-19T15:30:37Z"
-    type: "deployment"
+    type: "status"
     title: "~~搬去 Netlify~~"
     content: |
       ~~把构建脚本塞进 Netlify，配置了环境变量与静态资源路径，之后推送就能自动上线，再也不用手动 rsync。~~
@@ -98,7 +98,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-08-20T10:34:54Z"
-    type: "improvement"
+    type: "feature"
     title: "导航和资料对齐"
     content: |
       顺手把导航栏和个人资料的配置修完，之前的占位文案全都换成正式内容。
@@ -133,7 +133,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-09-02T04:50:02Z"
-    type: "content"
+    type: "post"
     title: "发了篇平衡树笔记"
     content: |
       复习平衡树，顺便测试了一遍 Markdown 渲染和封面图链路。
@@ -144,7 +144,7 @@ timeline:
       avatar: "src/assets/images/avatar.png"
       role: "开发者"
   - date: "2025-09-19T14:52:51Z"
-    type: "fix"
+    type: "commit"
     title: "热力图尾端偏移修补"
     content: |
       修复热力图数据计算，解决了尾端偏移的问题。
@@ -156,7 +156,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-09-19T22:16:49+08:00"
-    type: "maintenance"
+    type: "commit"
     title: "友链清理整顿"
     content: |
       把过期的友链条目都移掉，只留下活跃的站点，顺便整理了顺序。
@@ -168,7 +168,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-10-01T14:58:38+08:00"
-    type: "improvement"
+    type: "feature"
     title: "友链头像统一尺寸"
     content: |
       感觉友链的头像太小了，放大了一点。
@@ -180,7 +180,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-10-01T15:03:36+08:00"
-    type: "maintenance"
+    type: "commit"
     title: "扫除旧测试资源"
     content: |
       把一堆测试用的脚本和文件全删了，目录也顺手整理了一下。
@@ -205,7 +205,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-10-05T10:39:34+08:00"
-    type: "improvement"
+    type: "status"
     title: "切换逻辑修复"
     content: |
       切换页面的时候一直觉得很卡，尝试修复，但无果。
@@ -217,7 +217,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-10-09T02:14:25+08:00"
-    type: "docs"
+    type: "commit"
     title: "README"
     content: |
       不要骂我，我才想起来这个README没改。。
@@ -241,7 +241,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-10-09T02:57:42Z"
-    type: "improvement"
+    type: "feature"
     title: "热力图布局再调"
     content: |
       codex真强啊，把遗留的热力图问题一下就干掉了。
@@ -255,7 +255,7 @@ timeline:
       role: "开发者"
 
   - date: "2025-10-09T23:03:03+08:00"
-    type: "fix"
+    type: "commit"
     title: "Swup 卡顿处理"
     content: |
       codex还是太牛逼了，把我的陈年老bug修复了。
