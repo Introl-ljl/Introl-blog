@@ -304,6 +304,39 @@ function init() {
 /* Load settings when entering the site */
 init();
 
+const IS_DEV = import.meta.env.DEV;
+const DEBUG_PREFIX = "[layout]";
+const debugLog = (...messages: any[]) => {
+	if (!IS_DEV) {
+		return;
+	}
+	console.info(DEBUG_PREFIX, ...messages);
+};
+
+const getPathname = (target: string) => {
+	try {
+		return new URL(target, window.location.origin).pathname;
+	} catch {
+		return target;
+	}
+};
+
+const isHomeTarget = (target: string) => {
+	const homePath = getPathname(url('/'));
+	return pathsEqual(getPathname(target), homePath);
+};
+
+const updateHomeClass = (target?: string) => {
+	const bodyElement = document.querySelector('body');
+	if (!bodyElement) {
+		return;
+	}
+	const shouldApply = target ? isHomeTarget(target) : isHomeTarget(window.location.href);
+	bodyElement.classList.toggle('lg:is-home', shouldApply);
+	debugLog('updateHomeClass', { target: target ?? window.location.href, shouldApply, classList: bodyElement.className });
+	return shouldApply;
+};
+
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
 /*
@@ -322,16 +355,13 @@ const setup = () => {
 		document.documentElement.style.setProperty('--content-delay', '0ms')
 
 		// Banner navbar overlap logic removed
+		debugLog('link:click', { location: window.location.href });
 	})
 	window.swup.hooks.on('content:replace', initCustomScrollbar)
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
 		// change banner height immediately when a link is clicked
-		const bodyElement = document.querySelector('body')
-		if (pathsEqual(visit.to.url, url('/'))) {
-			bodyElement!.classList.add('lg:is-home');
-		} else {
-			bodyElement!.classList.remove('lg:is-home');
-		}
+		debugLog('visit:start', { to: visit.to?.url });
+		updateHomeClass(visit.to.url);
 
 		// increase the page height during page transition to prevent the scrolling animation from jumping
 		const heightExtend = document.getElementById('page-height-extend')
@@ -346,6 +376,8 @@ const setup = () => {
 		}
 	});
 	window.swup.hooks.on('page:view', () => {
+		const applied = updateHomeClass();
+		debugLog('page:view', { location: window.location.href, isHome: applied });
 		// hide the temp high element when the transition is done
 		const heightExtend = document.getElementById('page-height-extend')
 		if (heightExtend) {
@@ -367,11 +399,67 @@ const setup = () => {
         }, 200)
 	});
 }
-if (window?.swup?.hooks) {
-	setup()
-} else {
-	document.addEventListener('swup:enable', setup)
-}
+
+const ensureSwupHooks = () => {
+	if ((window as any).__layoutSwupHooksRegistered) {
+		return;
+	}
+
+	let pollId: number | undefined;
+	let hasLoggedWait = false;
+
+	const trySetup = () => {
+		if (!window?.swup?.hooks) {
+			return false;
+		}
+		if (pollId !== undefined) {
+			window.clearInterval(pollId);
+			pollId = undefined;
+		}
+		(window as any).__layoutSwupHooksRegistered = true;
+		debugLog('Swup hooks detected', { containers: (window as any).swup?.options?.containers });
+		setup();
+		return true;
+	};
+
+	if (trySetup()) {
+		debugLog('Swup hooks registered immediately');
+		return;
+	}
+
+	const handleEnable = () => {
+		if (trySetup()) {
+			document.removeEventListener('swup:enable', handleEnable);
+			window.removeEventListener('swup:enable', handleEnable);
+			window.removeEventListener('load', handleEnable);
+		}
+	};
+
+	document.addEventListener('swup:enable', handleEnable);
+	window.addEventListener('swup:enable', handleEnable);
+	window.addEventListener('load', handleEnable);
+
+	pollId = window.setInterval(() => {
+		if (!hasLoggedWait) {
+			debugLog('Waiting for Swup hooks to initialize');
+			hasLoggedWait = true;
+		}
+		if (trySetup()) {
+			document.removeEventListener('swup:enable', handleEnable);
+			window.removeEventListener('swup:enable', handleEnable);
+			window.removeEventListener('load', handleEnable);
+		}
+	}, 50);
+	setTimeout(handleEnable, 0);
+};
+
+ensureSwupHooks();
+const initialApplied = updateHomeClass();
+debugLog('initial-state', { location: window.location.href, isHome: initialApplied });
+window.addEventListener('popstate', () => {
+	const applied = updateHomeClass();
+	debugLog('popstate', { location: window.location.href, isHome: applied });
+});
 
 let backToTopBtn = document.getElementById('back-to-top-btn');
 let toc = document.getElementById('toc-wrapper');
