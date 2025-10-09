@@ -1,7 +1,6 @@
 ---
 import { getCollection } from "astro:content";
 import PostMeta from "../../components/PostMeta.astro";
-import Layout from "../../layouts/Layout.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import Giscus from "../../components/Giscus.astro";
 import ProjectHeatmap from "../../components/ProjectHeatmap.astro";
@@ -51,8 +50,7 @@ const getStatusColor = (status: string) => {
 };
 ---
 
-<Layout title={project.data.title}>
-  <MainGridLayout>
+<MainGridLayout title={project.data.title} description={project.data.description}>
     <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- 项目概览卡片 -->
       <div class="card-base hover:shadow-lg transition-all duration-300 overflow-hidden mb-8">
@@ -149,6 +147,5 @@ const getStatusColor = (status: string) => {
       </div>
     </div>
   </MainGridLayout>
-</Layout>
 
 <!-- Prose styles moved to global CSS (src/styles/main.css) -->
