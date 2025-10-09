@@ -466,9 +466,13 @@ const startRow = firstDate.getDay();
       )}
       <!-- GitHub 贡献热力图 -->
       <div class="github-heatmap w-full">
-        <div class="relative overflow-hidden">
-          <!-- 热力图容器 -->
-          <div class="grid w-full" style="grid-template-columns: auto repeat(53, minmax(0, 1fr)); grid-template-rows: auto repeat(7, minmax(0, 1fr)); gap: 1px; max-width: 100%;">
+        <div class="relative">
+          <div class="overflow-x-auto -mx-2 px-2 pb-2 sm:mx-0 sm:px-0">
+            <!-- 热力图容器 -->
+            <div
+              class="grid w-full min-w-[720px] sm:min-w-0"
+              style="grid-template-columns: auto repeat(53, minmax(0, 1fr)); grid-template-rows: auto repeat(7, minmax(0, 1fr)); gap: 1px;"
+            >
             
             <!-- 月份标签 -->
              {githubHeatmapConfig.display.showMonthLabels && monthLabels.map((month) => (
@@ -510,6 +514,7 @@ const startRow = firstDate.getDay();
                 ></div>
               );
             })}
+            </div>
           </div>
         </div>
         
