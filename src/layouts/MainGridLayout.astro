@@ -8,33 +8,16 @@ import { Icon } from "astro-icon/components";
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
 import TOC from "../components/widget/TOC.astro";
 import { siteConfig } from "../config";
-// Banner constants removed
-import Layout from "./Layout.astro";
 
 interface Props {
-	title?: string;
-	banner?: string;
-	description?: string;
-	lang?: string;
-	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
 }
 
-const {
-	title,
-	banner,
-	description,
-	lang,
-	setOGTypeArticle,
-	headings = [],
-} = Astro.props;
+const { headings = [] } = Astro.props;
 const mainPanelTop = siteConfig.banner.enable ? "20rem" : "5.5rem";
 ---
 
-<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
-
 <!-- Navbar -->
-<slot slot="head" name="head"></slot>
 <div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>
     <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
         <Navbar></Navbar>
@@ -114,4 +97,3 @@ const mainPanelTop = siteConfig.banner.enable ? "20rem" : "5.5rem";
         {!siteConfig.toc.enable && <div id="toc"></div>}
     </div>
 </div>
-</Layout>

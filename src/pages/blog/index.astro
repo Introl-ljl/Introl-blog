@@ -1,9 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import BlogPagination from "../../components/control/BlogPagination.astro";
 import PostCard from "../../components/PostCard.astro";
 import ProfileCard from "../../components/widget/ProfileCard.astro";
 import { PAGE_SIZE } from "../../constants/constants";
+import Layout from "../../layouts/Layout.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../../utils/content-utils";
 
@@ -29,8 +29,9 @@ const page = {
 };
 ---
 
-<MainGridLayout title="博客" description="我的博客文章">
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<Layout title="博客" description="我的博客文章">
+  <MainGridLayout>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
     <!-- 主内容区域 -->
     <div class="lg:col-span-3">
       <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
@@ -68,5 +69,6 @@ const page = {
         <ProfileCard />
       </div>
     </div>
-  </div>
-</MainGridLayout>
+    </div>
+  </MainGridLayout>
+</Layout>

@@ -3,22 +3,25 @@ import ArchiveWithProjects from "@components/ArchiveWithProjects.astro";
 import ProfileCard from "@components/widget/ProfileCard.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import Layout from "@layouts/Layout.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 ---
 
-<MainGridLayout title={i18n(I18nKey.archive)}>
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-    <!-- 主内容区域 -->
-    <div class="lg:col-span-3">
-      <ArchiveWithProjects></ArchiveWithProjects>
-    </div>
-    
-    <!-- 侧边栏区域 -->
-    <div class="lg:col-span-1">
-      <div class="sticky top-6 space-y-6">
-        <ProfileCard />
+<Layout title={i18n(I18nKey.archive)}>
+  <MainGridLayout>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <!-- 主内容区域 -->
+      <div class="lg:col-span-3">
+        <ArchiveWithProjects></ArchiveWithProjects>
+      </div>
+      
+      <!-- 侧边栏区域 -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-6 space-y-6">
+          <ProfileCard />
+        </div>
       </div>
     </div>
-  </div>
-</MainGridLayout>
+  </MainGridLayout>
+</Layout>
 

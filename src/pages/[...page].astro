@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from "astro";
 import ArchiveHomePage from "../components/ArchiveHomePage.astro";
 import { PAGE_SIZE } from "../constants/constants";
+import Layout from "../layouts/Layout.astro";
 import FullScreenLayout from "../layouts/FullScreenLayout.astro";
 import { getSortedPosts } from "../utils/content-utils";
 
@@ -17,6 +18,8 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props;
 ---
 
-<FullScreenLayout>
-    <ArchiveHomePage></ArchiveHomePage>
-</FullScreenLayout>
+<Layout>
+    <FullScreenLayout>
+        <ArchiveHomePage></ArchiveHomePage>
+    </FullScreenLayout>
+</Layout>

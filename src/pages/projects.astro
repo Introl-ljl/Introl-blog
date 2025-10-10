@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
 import ProjectCard from "../components/ProjectCard.astro";
@@ -91,7 +92,8 @@ const getStatusColor = (status: string) => {
 };
 ---
 
-<MainGridLayout title="项目展示" description="探索我的技术项目，从概念到实现的完整旅程">
+<Layout title="项目展示" description="探索我的技术项目，从概念到实现的完整旅程">
+  <MainGridLayout>
     <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- 页面标题 -->
       <header class="text-center mb-12">
@@ -142,5 +144,4 @@ const getStatusColor = (status: string) => {
 
     </div>
   </MainGridLayout>
-
-
+</Layout>

@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import ProfileCard from "../components/widget/ProfileCard.astro";
+import Layout from "../layouts/Layout.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import Giscus from "../components/Giscus.astro";
 
@@ -24,8 +25,9 @@ const friends = [
 ];
 ---
 
-<MainGridLayout title="友链" description="我的朋友们的博客和网站">
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<Layout title="友链" description="我的朋友们的博客和网站">
+  <MainGridLayout>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
     <!-- 主内容区域 -->
     <div class="lg:col-span-3">
       <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
@@ -132,8 +134,8 @@ const friends = [
         <ProfileCard />
       </div>
     </div>
-  </div>
-</MainGridLayout>
+  </MainGridLayout>
+</Layout>
 
 <style>
   .line-clamp-2 {

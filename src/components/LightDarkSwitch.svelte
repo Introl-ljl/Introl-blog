@@ -15,24 +15,25 @@ import { onMount } from "svelte";
 import type { LIGHT_DARK_MODE } from "@/types/config.ts";
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
-let mode: LIGHT_DARK_MODE = $state(AUTO_MODE);
+let mode: LIGHT_DARK_MODE = AUTO_MODE;
 
 // 颜色主题相关状态
-let hue = $state(getHue());
+let hue = getHue();
 const defaultHue = getDefaultHue();
 
 function resetHue() {
 	hue = getDefaultHue();
 }
 
-$effect(() => {
-	if (hue || hue === 0) {
-		setHue(hue);
-	}
-});
+let isMounted = false;
+
+$: if (isMounted && (hue || hue === 0)) {
+	setHue(hue);
+}
 
 onMount(() => {
 	mode = getStoredTheme();
+	isMounted = true;
 	const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
 	const changeThemeWhenSchemeChanged: Parameters<
 		typeof darkModePreference.addEventListener<"change">

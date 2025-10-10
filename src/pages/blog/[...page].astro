@@ -3,6 +3,7 @@ import type { GetStaticPaths, Page } from 'astro'
 import type { CollectionEntry } from 'astro:content'
 import { getSortedPosts } from '../../utils/content-utils'
 import { PAGE_SIZE } from '../../constants/constants'
+import Layout from '../../layouts/Layout.astro'
 import MainGridLayout from '../../layouts/MainGridLayout.astro'
 import PostCard from '../../components/PostCard.astro'
 import BlogPagination from '../../components/control/BlogPagination.astro'
@@ -32,8 +33,9 @@ page.url.first = '/blog/'
 page.url.last = page.lastPage > 1 ? `/blog/${page.lastPage}/` : '/blog/'
 ---
 
-<MainGridLayout title={`博客 - 第 ${page.currentPage} 页`} description="我的博客文章">
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<Layout title={`博客 - 第 ${page.currentPage} 页`} description="我的博客文章">
+  <MainGridLayout>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
     <!-- 主内容区域 -->
     <div class="lg:col-span-3">
       <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
@@ -69,5 +71,6 @@ page.url.last = page.lastPage > 1 ? `/blog/${page.lastPage}/` : '/blog/'
         <ProfileCard />
       </div>
     </div>
-  </div>
-</MainGridLayout>
+    </div>
+  </MainGridLayout>
+</Layout>
