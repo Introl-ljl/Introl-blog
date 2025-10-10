@@ -267,6 +267,16 @@ timeline:
       name: "Introl"
       avatar: "src/assets/images/avatar.png"
       role: "开发者"
-      
+  - date: "2025-10-10T17:42:24+08:00"
+    type: "feature"
+    title: "修复swup的bug"
+    content: |
+      好吧，我以为codex修复了，但实际上没有，现在应该没啥问题了。
+    icon: "material-symbols:scroll"
+    iconColor: "text-yellow-500"
+    author:
+      name: "Introl"
+      avatar: "src/assets/images/avatar.png"
+      role: "开发者"
 draft: false
 ---
