@@ -1,0 +1,299 @@
+---
+title: Codeforces Round 1059 (Div. 3）题解
+published: 2025-10-21
+description: Codeforces Round 1059 (Div. 3) A-G题解。
+tags: ['题解', 'CF']
+category: CF题解系列
+draft: false
+---
+# A. Beautiful Average
+求数组 $a$ 的子数组的最大平均值，显然为数组的最大值。
+
+水题不放代码了。
+
+# B. Beautiful String
+给定一个长度为 $n$ 的二进制字符串 $s$，要求找到一个子序列 $p$，要求满足：
+- 子序列 $p$ 是递减的。
+- 字符串 $s$ 移除序列 $p$ 之后的字符串必须是**回文串**。
+## 题目解析
+显然，由于字符串只包含 $0$ 和 $1$，那么我们可以把所有的 $0$ 加入子序列，删除之后的字符串全为 $1$，自然满足回文串的要求。
+# C. Beautiful XOR
+给定两个整数 $a,b$，需要通过执行以下操作：
+
+- 选择任意整数 $x$，满足 $0\le x\le a$。
+- 令 $a:=a\oplus x$。
+
+要求在 $100$ 次操作内将 $a$ 转化为 $b$。
+## 题目解析
+首先，考虑 $a$ 的二进制最高有效位 $\operatorname{msb}(a)$.
+
+由于 $x$ 满足 $0\le x\le a$，那么显然，
+
+$$\operatorname{msb}(a\oplus x)\le \operatorname{msb}(a)$$
+
+所以如果 $\operatorname{msb}(b)>\operatorname{msb}(a)$，是无法转化成功的，直接输出 $-1$ 即可。
+
+之后考虑剩下的情况，举个例子：
+
+$$ a=(00101..1...)_2$$
+
+$$ b=(00101..0...)_2$$ 
+
+当两个数的某一位不相同时，那我们可以设 $x=(00000..1...)_2$，通过 $x\oplus a$ 将这一位更改为相同。
+
+那么就很简单了，我们只需要遍历这两个数的二进制位 $pos(0\le pos< len(a))$，如果出现不同，则通过 $x\oplus (1<<pos)$ 来更改。
+
+由于 $a,b$ 的最大值都为 $10^9$，都在 `int` 范围内，所以最多 $32$ 次就可以完成更改。
+## Code
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+const int MaxN = 2e5 + 100;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M;
+int a[MaxN];
+int getlen(int x){
+    int sum=0;
+    while(x>0){
+        x>>=1;
+        sum++;
+    }
+    return sum;
+}
+inline void Solve()
+{
+    int x,y;
+    cin>>x>>y;
+    if(x==y){
+        cout<<0<<endl;
+        return ;
+    }
+    int len=getlen(x),leny=getlen(y);
+    if(leny>len){
+        cout<<-1<<endl;
+        return ;
+    }
+    int nx=x,ny=y;
+    vi ans;
+    for(int i=0;i<len;i++){
+        int xx=(nx>>i)&1;
+        int yy=(ny>>i)&1;
+        if(xx!=yy){
+            int cnt=(1<<i);
+            ans.push_back(cnt);
+            nx^=cnt;
+        }
+    }
+    cout<<ans.size()<<endl;
+    for(auto y:ans){
+        cout<<y<<" ";
+    }
+    cout<<endl;
+    cerr<<nx<<endl;
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
+```
+# D. Beautiful Permutation
+交互题。
+
+给定一个长度为 $n$ 的排列 $p$，并选择了两个整数 $l,r$，并修改了 $l\le i\le r$ 的所有 $p_i$ 为 $p_i+1$。
+
+每次询问可以选择两个整数 $l,r$，并可以选择查询排列 $p[l...r]$ 的 **原始序列的子数组** 和或 **修改后序列的子数组和**。
+
+要求在不超过 $40$ 次查询内找到修改时的参数 $l,r$。
+## 题目解析
+首先，我们可以通过查询 $(1,n)$ 获得修改后的总数组和 $sum_{2}(1,n)$。同时，由于排列的性质，我们知道原始序列的总数组和是 $\frac{n(n+1)}{2}$。那么我们可以知道修改区间的长度就是修改后的数组和减去原始序列的数组和 $len$。
+
+那么接下来，考虑将数组一分为二。首先考虑前半段 $[1,mid]$，我们可以分别求出这段区间的原始数组和以及修改后数组和。同理通过作差法得出这段区间内，有多少个数被修改。
+
+不难发现，总共会产生 $3$ 种情况：
+
+- 第一种情况，修改的这段区间**全部在** $[1,mid]$ 的范围内。
+- 第二种情况，修改的这段区间内**部分在** $[1,mid]$ 的范围内。
+- 第三种情况，修改的这段区间**完全不在** $[1,mid]$ 的范围内。
+
+其中，第二种情况最好处理，由于修改的区间是 **连续的**，那么这段区间的范围就是 $[mid-len_{1,mid}+1,mid-len_{1,mid}+len_{1,N}]$。
+
+考虑其他两种情况，我们可以使用**二分法**，继续拆分区间，直到出现情况二为止。复杂度为 $O(\log n)$。
+## Code
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+#define endll endl,cout.flush();
+const int MaxN = 2e5 + 100;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M;
+int a[MaxN];
+inline void Solve()
+{
+    cin>>N;
+    int cursum=(N+1)*N/2;
+    cout<<2<<" "<<1<<" "<<N<<endll
+    int x;
+    cin>>x;
+    int len=x-cursum;
+    cerr<<"debug "<<len<<endl;
+    int l=1,r=N;
+    while(l<=r){
+        int n1,n2;
+        int mid=(l+r)>>1;
+        cout<<2<<" "<<l<<" "<<mid<<endll
+        cin>>n1;
+        cout<<1<<" "<<l<<" "<<mid<<endll
+        cin>>n2;
+        int cha=n1-n2;
+        cerr<<"debug  "<<l<<" "<<r<<endl;
+        if(len==1){
+            if(cha==len&&l==mid){
+                cout<<"! "<<l<<" "<<l<<endll
+                return;
+            }
+        }
+        if(cha==0){
+            l=mid+1;
+        }
+        else if(cha==len){
+            r=mid;
+        }
+        else{
+            cout<<"!"<<" "<<mid-cha+1<<" "<<mid-cha+len<<endll
+            return ;
+        }
+    }
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
+```
+# E. Beautiful Palindromes
+给定一个长度为 $n$ 的数组 $a$，满足 $1\le a_i\le n$，以及一个整数 $k$。
+
+需要执行 $k$ 次以下操作：
+- 选择一个整数 $x$，且符合 $1\le x\le n$。
+- 将 $x$ 添加到数组 $a$ 的末尾。
+
+要求执行完 $k$ 次操作后，结果数组中的回文子数组的数量最小。
+## 题目解析
+首先，考虑如何使得回文子数组的数量最少。
+
+第一种思路是，保证数组中的元素均不互相相同，这样显然是最少的。
+
+但是虽然 $k\le n$，$n+k$ 也有可能出现大于 $2\times 10^5$ 的情况。
+
+那么考虑另一种思路，假设这个数组最初没有任何元素，应该怎么操作才能使得回文子数组最小？
+
+不难发现，每次我们只需要保证 $a_i\neq a_{i-1}$ 和 $a_i\neq a_{i-2}$，这样就可以保证不会产生回文子数组。
+
+进一步考虑，其实我们只需要 $3$ 个数字，就可以实现自身不产生任何回文。
+
+那么回到本题，做法就很简单了。我们只需要找到一个没有出现在 $a$ 中的数 $x$，然后选择数组 $a$ 的最后一个数作为 $z$，再选择一个不同于 $x$ 和 $z$ 的任意数字 $y$。之后按照 $x,y,z$ 的顺序输出即可。
+## Code
+赛时代码，写的比较复杂。
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+const int MaxN = 4e5 + 100;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M;
+int a[MaxN];
+inline void Solve()
+{
+    cin>>N>>M;
+    map<int,int>mp;
+    for(int i=1;i<=N;i++){
+        cin>>a[i];
+        mp[a[i]]=1;
+    }
+    int pos=1;
+    int randd=0;
+    // cerr<<pos<<endl;
+    for(int i=N+1;i<=N+M;i++){
+        if(pos==N+1){
+            randd+=1;
+            pos=1;
+        }
+        if(mp[pos]==randd){
+            // cerr<<pos<<" ";
+            // cerr<<mp[pos]<<" ";
+            if(pos==a[i-1]||pos==a[i-2]){
+                mp[pos]++;
+                pos++;
+                i--;
+                continue;
+            }
+            a[i]=pos;
+            mp[pos]++;
+            pos++;
+            cout<<a[i]<<" ";
+        }
+        else{
+            pos++;
+            i--;
+        }
+    }
+    cout<<endl;
+    // cerr<<endl;
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
+```
