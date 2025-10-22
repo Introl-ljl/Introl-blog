@@ -118,13 +118,15 @@ export default defineConfig({
 				"https://blog.introl.top/friends/",
 			],
 			filter: (page) => {
-				// 排除分页页面的重复内容
-				if (
-					page.includes("/2/") ||
-					page.includes("/3/") ||
-					page.includes("/4/")
-				) {
-					return false;
+				// 排除顶层数字分页（/2/, /3/, ...），避免与首页重复
+				try {
+					const pathname = new URL(page).pathname;
+					if (/^\/[0-9]+\/$/.test(pathname)) return false;
+					if (/^\/blog\/[0-9]+\/$/.test(pathname)) return false;
+				} catch {
+					// fallback for non-URL strings
+					if (/^\/[0-9]+\/$/.test(page)) return false;
+					if (/^\/blog\/[0-9]+\/$/.test(page)) return false;
 				}
 				return true;
 			},
