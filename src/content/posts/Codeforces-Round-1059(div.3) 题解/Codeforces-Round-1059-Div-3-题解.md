@@ -297,3 +297,161 @@ signed main()
     return 0;
 }
 ```
+# F. Beautiful Intervals
+给定了 $m$ 个区间 $[l_i,r_i]$，且满足 $1\le l_i\le r_i\le n$。
+
+设一个长度为 $n$ 的排列 $p$，包括 $0,1,2,...,n-1$ 恰好一次。
+
+对于每个区间 $[l_i,r_i]$，考虑其在排列中的子数组 $p[l_i,...,r_i]$，求解出 $v_i=\operatorname{mex}(p[l_i,...,r_i])$。
+
+我们需要构造一个排列 $p$，使得 $\operatorname{mex}(v_i)$ 的值最小。
+
+## 题目解析
+首先，我们可以考虑一种构造，在序列中插入连续的 $[0,2,1]$。
+
+不难发现，这种情况无论区间在哪，$\operatorname{mex}(M)\le 2$。
+
+证明很简单，对于所有的区间，任意同时包含 `0` 和 `1` 的区间一定包含 `2`，那么这些区间的 `mex` 一定不等于 `2`。那么 $2\notin M$，所以 $\operatorname{mex}(M)\le 2$。
+
+那么现在已知 $\operatorname{mex}(M)\le 2$，我们只需要分类讨论一下。
+
+首先考虑 $\operatorname{mex}(M)=0$，也就意味着所有区间都会包含 $0$。那么我们只需要找到所有区间是否有一个公共点，并把这个公共点的值设为 $0$，那么不管其他位置怎么排列，一定满足了 $\operatorname{mex}(M)=0$。
+
+接下来考虑 $\operatorname{mex}(M)=1$ 的情况。我们可以将其转化一下。
+
+首先，由于 $\operatorname{mex}(M)\neq 0$，那么也就意味着不是所有的区间都包含 $0$。那么如何使得排列满足 $\operatorname{mex}(M)=1$ 呢？不难发现，对于所有包含 $0$ 的区间，只要这些区间也一定包含 $1$，那么这些包含 $0$ 和 $1$ 的区间满足 $\operatorname{mex}(v_i)>1$，而另外一部分区间满足 $\operatorname{v_i}=0$，所以最终的 $\operatorname{mex}(M)=1$。
+
+一种可行的排列方法是：把 $0$ 和 $1$ 排列时放在一起，且保证**不存在一个区间能够把这两个数恰好分割开**。
+
+具体而言，假设 $0$ 的位置是 $x$，我们需要保证 $1$ 位于 $x-1$ 或 $x+1$ 这两个位置之一。
+同时，为了保证**不存在一个区间能够把这两个数恰好分割开**，还需要：
+- 若 $1$ 位于 $x-1$，那么只需要保证 $x$ 不是任何区间的左端点，所有的包含 $0$ 的区间一定包含 $1$。
+- 同理，只需要保证 $x$ 不是任何区间的右端点即可。
+
+**注意：这两个条件只要满足其一即可。**
+
+最后，对于不满足上述条件的情况，我们直接构造出一个 $[0,2,1]$ 即可满足 $\operatorname{mex}(M)=2$。
+## Code
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+const int MaxN = 2e5 + 100;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M;
+int a[MaxN];
+int l1[MaxN], r1[MaxN];
+int l[MaxN], r[MaxN];
+inline void Solve()
+{
+    memset(a,0,sizeof a);
+    memset(l1,0,sizeof l1);
+    memset(r1,0,sizeof r1);
+
+    cin >> N >> M;
+    for (int i = 1; i <= M; i++)
+    {
+        cin >> l[i] >> r[i];
+        l1[l[i]]++;
+        r1[r[i]]++;
+        for (int j = l[i]; j <= r[i]; j++)
+        {
+            a[j]++;
+        }
+    }
+    for (int i = 1; i <= N; i++)
+    {
+        if (a[i] == M)
+        {
+            cerr << 0 << endl;
+            int pos=1;
+            for (int j = 1; j <= N; j++)
+            {
+                if (j == i)
+                {
+                    cout << 0 << " ";
+                    continue;
+                }
+                cout << pos << " ";
+                pos++;
+            }
+            cout<<endl;
+            return;
+        }
+    }
+    for (int i = 1; i <= N; i++)
+    {
+        if (l1[i] == 0 && i > 1)
+        {
+            cerr << 1 << endl;
+            int pos=2;
+            for (int j = 1; j <= N; j++)
+            {
+                if (j == i - 1)
+                {
+                    cout << "1 ";
+                    continue;
+                }
+                if (j == i)
+                {
+                    cout << "0 ";
+                    continue;
+                }
+                cout << pos << " ";
+                pos++;
+            }
+            cout<<endl;
+            return;
+        }
+        if (r1[i] == 0 && i < N)
+        {
+            int pos=2;
+            cerr << 1 << endl;
+            for (int j = 1; j <= N; j++)
+            {
+                if (j == i)
+                {
+                    cout << "0 ";
+                    continue;
+                }
+                if (j == i+1)
+                {
+                    cout << "1 ";
+                    continue;
+                }
+                cout << pos << " ";
+                pos++;
+            }
+            cout<<endl;
+            return;
+        }
+    }
+    cout << "0 2 1 ";
+    for (int i = 4; i <= N; i++)
+    {
+        cout << i - 1 << " ";
+    }
+    cout << endl;
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
+```
