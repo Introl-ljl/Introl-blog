@@ -455,3 +455,99 @@ signed main()
     return 0;
 }
 ```
+# G. Beautiful Tree
+给定一个正整数 $n$，构造一棵树，要求符合以下要求：
+
+令 $E$ 为树中的边集合，要求
+
+$$S=\sum_{{u,v}\in E}(u\cdot v)$$
+
+是一个完全平方数。
+## 题目解析
+光看式子可能不知道要求的是什么，我们可以先举个例子画个图。
+
+![p1.png](p1.png)
+
+如图，此树的 $S$ 应为：
+
+$$S=(2\cdot 1)+(3\cdot 1)+(4\cdot 1)=9=(3)^2$$
+
+那么如何构造才能使得 $S=(x)^2$ 呢？
+
+我们可以先转化思路，直接令 $S=n^2$，然后尝试对于每个 $n$ 构造一种可行的方案。
+
+例如 $n=5$，如果要满足 $S=n^2=25$，就需要构造如下的树结构：
+
+![p2.png](p2.png)
+
+$$S=(1\cdot 2)+(2\cdot 3)+(3\cdot 4)+(5\cdot 1)=25=(5)^2$$
+
+现在我们知道了如何构造 $n=5$ 时的情况，那么如何扩展到更大的数字呢？
+
+考虑 $n=6$ 的情况，可以转化思路，从 $n=5$ 来推导。由于
+
+$$S_6-S_5=6^2-5^2=11$$
+
+所以也就意味着，我们需要添加一个节点 `6`，同时答案要增加 $11$。我们可以先考虑式子：
+
+$$S_6=(1\cdot 2)+(2\cdot 3)+(3\cdot 4)+(5\cdot 1)+11\\=((1\cdot 2)+(2\cdot 3)+(3\cdot 4)+(5\cdot 1))+(1\cdot 6)+(2\cdot 5)-(5\cdot 1)\\=(1\cdot 2)+(2\cdot 3)+(3\cdot 4)+(1\cdot 6)+(2\cdot 5)\\=36$$
+
+这样就可以构造出来了，可以进一步推导验证，可以发现规律：
+
+- 首先，固定放入 $(1,2),(2,3),(3,4)$。
+- 之后，将 $n$ 与 $1$ 相连，$(n,1)$。
+- 最后，对于所有 $v=5,6,...,n-1$，分别添加一条 $(2,v)$。
+
+最后，把 $n=1,2,3,4$ 的情况特判一下即可。
+## Code
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+const int MaxN = 2e5 + 100;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M;
+int a[MaxN];
+inline void Solve()
+{
+    cin>>N;
+    if(N<=2){
+        cout<<-1<<endl;
+        return ;
+    }
+    if(N==3){
+        cout<<"2 3\n3 1"<<endl;
+        return ;
+    }
+    if(N==4){
+        cout<<"1 2\n1 3\n1 4"<<endl;
+        return ;
+    }
+    cout<<N<<" 1"<<endl;
+    cout<<"1 2\n2 3\n3 4"<<endl;
+    for(int i=5;i<N;i++){
+        cout<<i<<" 2"<<endl;
+    }
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
+```
