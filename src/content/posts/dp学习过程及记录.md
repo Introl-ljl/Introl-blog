@@ -1,10 +1,9 @@
 ---
 title: dp学习过程及记录
-published: 2024-10-10
+published: 2025-10-31
 description: 在dp学习过程中的一些理解及总结，长期更新。
 tags: ['算法', '动态规划dp', '学习记录']
 category: OI学习笔记
-project: 博客开发
 draft: false
 ---
 # 关键点
@@ -27,17 +26,12 @@ draft: false
 #### $O(n \log n)$ 做法
 当 $n$ 的范围扩大到 $n \leq 10^5$ 时，第一种做法就不够快了，下面给出了一个 $O(n \log n)$ 的做法。
 
-回顾一下之前的状态：$(i, l)$。
-
-但这次，我们不是要按照相同的 $i$ 处理状态，而是直接判断合法的 $(i, l)$。
-
-再看一下之前的转移：$(j, l - 1) \rightarrow (i, l)$，就可以判断某个 $(i, l)$ 是否合法。
-
-初始时 $(1, 1)$ 肯定合法。
-
-那么，只需要找到一个 $l$ 最大的合法的 $(i, l)$，就可以得到最终最长不下降子序列的长度了。
-
----
+>回顾一下之前的状态：$(i, l)$。\
+但这次，我们不是要按照相同的 $i$ 处理状态，而是直接判断合法的 $(i, l)$。\
+再看一下之前的转移：$(j, l - 1) \rightarrow (i, l)$，就可以判断某个 $(i, l)$ 是否合法。\
+初始时 $(1, 1)$ 肯定合法。\
+那么，只需要找到一个 $l$ 最大的合法的 $(i, l)$，就可以得到最终最长不下降子序列的长度了。\
+\
 摘自[**OI wiki** 最长不下降子序列](https://oiwiki.org/dp/basic/#%E6%9C%80%E9%95%BF%E4%B8%8D%E4%B8%8B%E9%99%8D%E5%AD%90%E5%BA%8F%E5%88%97)
 
 根据此思路，可以进行如下分析：
@@ -50,18 +44,18 @@ draft: false
 
 考虑每一步的决策，
 
-当 $a_i\le dp_len$ 时，显然 可以将其插入序列末尾，$len+=1$。
+当 $a_i\le dp_{len}$ 时，显然 可以将其插入序列末尾，$len+=1$。
 
 反之，可以将 $dp$ 序列中**第一个大于它的元素**更新为 $a_i$。这一步中可以使用[二分](\学习笔记-3-二分.md)解决。
 
 ---
-至此，Question 1.解决。
+至此，Que 1.解决。
 ### Question 2.
 第二问要求拦截所有导弹所需的最小数量。
 #### 考虑贪心
 从第一问来考虑，一套系统所拦截的即为当前的最长不上升子序列，推广考虑，多套系统拦截即为每次删除最长不上升子序列之后重复操作。所以根据**Dilworth**定理可得，**最长上升子序列的长度就是能构成的不上升序列的个数**。
 
-所以第二问实际上即为求解最长上升子序列的长度，算法与**Que 1.**基本相同，稍微改动即可。
+所以第二问实际上即为求解最长上升子序列的长度，算法与 **Que 1.** 基本相同，稍微改动即可。
 ## Code
 ```cpp
 // #pragma GCC optimize(1, 2, 3, "Ofast", "inline")
@@ -253,13 +247,17 @@ signed main()
 
 要求子序列最大值，显然我们可以使用 $dp$ 做法。
 
-考虑参数，设 $dp_i$ 表示以 $i$ 为结尾的符合条件的子序列最大值。最终的答案即为 $$\max_{1\le i\le n}{dp_i}$$
+考虑参数，设 $dp_i$ 表示以 $i$ 为结尾的符合条件的子序列最大值。最终的答案即为 
+
+$$\max_{1\le i\le n}{dp_i}$$
 
 考虑预处理，我们可以先预处理出 $pre_i$，表示序列中上一个与 $a_i$ 相同的数的位置。具体实现也十分简单，使用``map``即可。
 
 不难得出，$pre_i$ 如果不为 $0$，则 $dp_i$ 才会有值。又因为每个数字都是成对出现的，所以，只需要找到与这个数相同的**上一个数**和**上一个数的上一个数**，求出从**上一个数的上一个数**的下一位至**上一个数**的前一位的最大值，这样可以满足 $1\le i<k,s2_i\ne s2_{i+1}$ 的条件。再加上当前的 $2$ 就是 $dp_i$ 的答案。
 
-即 $$dp_i=\max_{j=pre_{pre_i}}^{pre_i-1}{dp_j+2}$$
+即 
+
+$$dp_i=\max_{j=pre_{pre_i}}^{pre_i-1}{dp_j+2}$$
 
 关于求 $\max$ 的操作，我们可以使用数据结构优化，比如线段树或者ST表等。
 
@@ -400,7 +398,9 @@ signed main()
 
 不难得出，每保留单独的一位，代价就会增加 $10^{j-1}\times s_i-v_i$。所以我们可以从后往前递推，
 
-可得 $$dp_{i,j}=\min(dp_{i,j},dp_{i,j+1}+10^{j-1}\times s_i-v_i)$$
+可得 
+
+$$dp_{i,j}=\min(dp_{i,j},dp_{i,j+1}+10^{j-1}\times s_i-v_i)$$
 
 显然，我们可以使用滚动数组来优化空间，所以最终的式子为：
 $$dp_j=\min(dp_j,dp_{j+1}+10^{j-1}\times s_i-v_i)$$
@@ -488,11 +488,17 @@ signed main()
 考虑状态转移，显然可得：
 
 对于 $a_i(1\le i\le n)$，若 $a_i>0$：
+
 $$dp_{cnt,j}=\max_{j=a_i}^{cnt}(dp_{cnt-1,j},dp_{cnt-1,j-1})$$
+
 若 $a_i<0$：
+
 $$dp_{cnt,j}=\max_{j=cnt-\lvert a_i\rvert}^{0}(dp_{cnt,j}+1,dp_{cnt-1,j}+1)$$
+
 若 $a_i=0$：
+
 $$dp_{cnt,j}=dp_{cnt-1,j}(0\le j<cnt)$$
+
 
 考虑优化，可以发现，在``cnt``更新之后，只要check的值小于等于``cnt``，只需要将值加一即可。因此我们可以优化掉第一维只保留第二维。对于区间修改，可以使用线段树来实现。
 
@@ -719,9 +725,9 @@ signed main()
 }
 
 ```
-## P4059 找爸爸（daddy）
+# P4059 找爸爸（daddy）
 
-### 题目分析
+## 题目分析
 
 题目要求DNA序列的最大相似程度，考虑 $dp$ 做法，可以得出 $dp_{i,j,k}$ 表示 a序列长度为 $i$，b序列长度为 $j$ ，末尾有/无空格（$k=0$ 无空格，$k=1$ 表示a序列有空格，$k=2$ 表示b序列末尾有空格）时的最大相似程度。
 
@@ -810,4 +816,225 @@ signed main()
     return 0;
 }
 
+```
+# P3558 [POI 2013] BAJ-Bytecomputer
+## description
+给定一个由集合 ${-1,0,1}$ 组成的长度为 $n$ 的序列，可以进行多次操作：
+
+每次操作，对于任何 $1\le i<n$，$x_{i+1}:=x_{i+1}+x_i$。
+
+要求将序列转化为非递减序列，并使得操作次数最少。
+## Solution
+不难发现，操作后的序列一定只会有 ${-1,0,1}$ 这三个数。
+
+那么考虑dp，设 $f_{i,j}$ 表示前 $i$ 个数组成的序列是非递减序列，且序列的最后一位是 $j$。
+
+接下来考虑转移，这里可以通过 **分类讨论** 来解决。
+
+### Case 1
+
+首先考虑 $a_i=-1$ 的情况。
+
+$$f_{i,-1}=\min(f_{i-1,-1},f_{i,-1})$$
+
+$$f_{i,1}=\min(f_{i-1,1}+2,f_{i,1})$$
+
+这里的第一个公式好理解，就是直接转移。第二个公式可以将其理解为对于前一位是 $1$ 的情况下，可以通过修改第 $i$ 位两次来使得第 $i$ 位仍然是 $1$。
+
+那么为什么不能转移到 $f_{i,0}$ 呢？因为显然想要使得 $-1$ 变大，其前一位必须是 $1$。这样又不符合非递减的要求，所以无法转移。
+### Case2
+
+同理考虑 $a_i=0$ 的情况。
+
+$$f_{i,-1}=\min(f_{i-1,-1}+1,f_{i,-1})$$
+
+$$f_{i,0}=\min(f_{i-1,0},f_{i-1,-1})$$
+
+$$f_{i,1}=\min(f_{i-1,1}+1,f_{i,1})$$
+
+第一个转移，我们要让 $a_i$ 变小，所以只能通过 $f_{i-1,-1}+1$ 转移。
+
+第二个转移，$a_i$ 保持不变，所以其可以从 $f_{i-1,-1}$ 和 $f_{i-1,0}$ 直接转移。
+
+第三个转移，$a_i$ 变大，所以只能通过 $f_{i-1,1}+1$ 转移。
+
+### Case3
+
+最后考虑 $a_i=1$ 的情况。
+
+$$f_{i,-1}=\min(f_{i-1,-1}+2,f_{i,-1})$$
+
+$$f_{i,0}=\min(f_{i-1,-1}+1,f_{i,-1})$$
+
+$$f_{i,1}=\min(f_{i-1,-1},f_{i-1,0},f_{i-1,1})$$
+
+第一个转移，$a_i$ 变小，所以只能通过 $f_{i-1,-1}+2$ 来转移。
+
+第二个转移，$a_i$ 变为 $0$，所以只能通过 $f_{i-1,-1}+1$ 来转移。
+
+第三个转移，$a_i$ 保持不变，所以可以通过 $f_{i-1,-1},f_{i-1,0},f_{i-1,1}$ 直接转移。
+
+## Code
+由于数组下标不能为负数，所以所有的 $j$ 统一加一。
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+// #define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+const int MaxN = 1e6 + 100;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M;
+int a[MaxN];
+int dp[MaxN][10];
+inline void Solve()
+{
+    cin >> N;
+    for (int i = 1; i <= N; i++)
+    {
+        cin >> a[i];
+    }
+    for (int i = 1; i <= N; i++)
+    {
+        for (int j = 0; j <= 2; j++)
+        {
+            dp[i][j] = INF;
+        }
+    }
+    dp[1][a[1] + 1] = 0;
+    for (int i = 1; i < N; i++)
+    {
+        if (a[i + 1] == -1)
+        {
+            dp[i + 1][0] = min(dp[i + 1][0], dp[i][0]);
+            dp[i + 1][2] = min(dp[i + 1][2], dp[i][2] + 2);
+        }
+        if (a[i + 1] == 0)
+        {
+            dp[i + 1][1] = min(dp[i][0], dp[i][1]);
+            dp[i + 1][0] = min(dp[i][0] + 1, dp[i + 1][0]);
+            dp[i + 1][2] = min(dp[i + 1][2], dp[i][2] + 1);
+        }
+        if (a[i + 1] == 1)
+        {
+            dp[i + 1][2] = min({dp[i + 1][2], dp[i][1], dp[i][0], dp[i][2]});
+            dp[i + 1][1] = min(dp[i + 1][1], dp[i][0] + 1);
+            dp[i + 1][0] = min(dp[i + 1][0], dp[i][0] + 2);
+        }
+    }
+    int ans = min({dp[N][1], dp[N][0], dp[N][2]});
+    if (ans == INF)
+    {
+        cout << "BRAK" << endl;
+        return;
+    }
+    cout << ans << endl;
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
+```
+# P6005 [USACO20JAN] Time is Mooney G
+## Description
+有 $N$ 个城市，之间通过 $M$ 条单向道路来连接，每次到达城市 $i$ 可以获得 $m_i$。每次移动消耗一天，且移动 $T$ 天需要花费 $C\times T^2$。
+
+从城市 $1$ 出发，最后回到城市 $1$，要求求出可以获得的最大值。
+## Solution
+考虑dp做法。我们设 $f_{i,j}$ 表示在出差的第 $i$ 天，当前所在城市编号是 $j$ 时的最大贡献。那么最后的答案就是所有的 $f_{i,1}$ 的最大值。
+
+考虑状态转移，显然，对于当前城市 $j$，可以从符合存在 $k\rightarrow j$ 的城市 $k$ 转移。所以建图的时候可以建反向边来帮助转移。
+
+那么转移方程就是：
+
+$$f_{i,j}=\max(f_{i-1,k}+m_j,f_{i,j})$$
+
+其中 $k$ 满足存在 $k\rightarrow j$ 的边。
+
+### 细节
+- 初始化时，$f_0,1=0$。所有的节点都要初始化为 $-1$，表示在第 $i$ 天时不可能在城市 $j$。
+- $i$ 的最大值可以直接设为 $1000$，因为在最极限的情况下，$i=1000$ 也会使得 $\max(m_i)\times i-i^2\times C\le 0$。
+
+## Code
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+// #define MULTI_CASES
+#define ll long long
+#define int ll
+#define endl '\n'
+#define vi vector<int>
+#define PII pair<int, int>
+const int MaxN = 2300;
+const int INF = 1e9;
+const int mod = 1e9 + 7;
+int T = 1, N, M, C;
+int a[MaxN];
+vi G1[MaxN * 2];
+int dp[MaxN][MaxN];
+inline void Solve()
+{
+    cin >> N >> M >> C;
+    for (int i = 1; i <= N; i++)
+    {
+        cin >> a[i];
+    }
+    for (int i = 1; i <= M; i++)
+    {
+        int x, y;
+        cin >> x >> y;
+        G1[y].push_back(x);
+    }
+    memset(dp, -1, sizeof dp);
+    dp[0][1] = 0;
+    int ans = 0;
+    for (int i = 1; i <= 1000; i++)
+    {
+        for (int j = 1; j <= N; j++)
+        {
+            for (auto y : G1[j])
+            {
+                if (dp[i - 1][y] != -1)
+                {
+                    // cerr<<i-1<<" "<<y<<" "<<dp[i-1][y]<<endl;
+                    dp[i][j] = max(dp[i - 1][y] + a[j], dp[i][j]);
+                }
+            }
+            // cerr << i << " " << j << " " << dp[i][j] << endl;
+        }
+        ans = max(ans, dp[i][1] - C * i * i);
+    }
+
+    cout << ans << endl;
+}
+signed main()
+{
+#ifdef NOI_IO
+    freopen(".in", "r", stdin);
+    freopen(".out", "w", stdout);
+#endif
+    ios::sync_with_stdio(0);
+    cin.tie(nullptr), cout.tie(nullptr);
+#ifdef MULTI_CASES
+    cin >> T;
+    while (T--)
+#endif
+        Solve();
+    return 0;
+}
 ```
