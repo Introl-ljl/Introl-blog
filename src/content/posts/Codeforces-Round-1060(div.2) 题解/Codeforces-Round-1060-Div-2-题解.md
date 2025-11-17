@@ -2,7 +2,9 @@
 title: Codeforces Round 1060 (Div. 2）题解
 published: 2025-10-23
 description: Codeforces Round 1060 (Div. 2) A-E题解。
-tags: ['题解', 'CF']
+tags:
+  - 题解
+  - CF
 category: CF题解系列
 draft: false
 ---

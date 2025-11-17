@@ -65,3 +65,7 @@ scripts/quick-start.sh
 
 # Local Netlify folder
 .netlify
+src/content/posts/.obsidian/app.json
+src/content/posts/.obsidian/appearance.json
+src/content/posts/.obsidian/core-plugins.json
+src/content/posts/.obsidian/workspace.json
