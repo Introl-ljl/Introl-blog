@@ -1,0 +1,401 @@
+{
+  "meta": {
+    "vmid": "1048480581",
+    "type": {
+      "code": 1,
+      "label": "anime"
+    },
+    "fetchedAt": "2025-11-16T11:36:37.548Z",
+    "total": 11,
+    "filtered": 9,
+    "totalPages": 1
+  },
+  "items": [
+    {
+      "seasonId": 48011,
+      "mediaId": 22053031,
+      "title": "不时用俄语小声说真心话的邻桌艾莉同学",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "https://i0.hdslb.com/bfs/bangumi/image/96f9aeb74c9646c318f25bba798462061bd800d7.png",
+      "evaluate": "坐在久世政近邻桌的艾莉同学，看政近的目光总是很冷淡。\n然而她又时不时地用俄语向他表露心意……\n而这些话语从未被政近错过。\n原来，政近其实有着母语级别的俄语听力！！\n\n艾莉同学对此一无所知，时不时地说着...",
+      "totalEpisodes": 12,
+      "progress": "",
+      "rating": {
+        "score": 7.8,
+        "count": 13899
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "日常",
+        "搞笑",
+        "校园",
+        "恋爱",
+        "小说改"
+      ],
+      "publish": {
+        "pubTime": "2024-07-03 22:30:00",
+        "pubTimeDisplay": "2024年07月03日22:30",
+        "releaseDate": "2024-07-03",
+        "releaseDateDisplay": "2024年7月3日"
+      },
+      "latestEpisode": {
+        "id": 836000,
+        "title": "12",
+        "longTitle": "向前看",
+        "index": "全12话",
+        "pubTime": "2024-10-02 22:30:00"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss48011"
+    },
+    {
+      "seasonId": 425,
+      "mediaId": 425,
+      "title": "某科学的超电磁炮",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "http://i0.hdslb.com/bfs/bangumi/image/aad797f1f0212aba5578a1ed1c992ef1b9ff7c4b.jpg",
+      "evaluate": "故事发生在面积占据东京都的三分之一，居住着230万名人口且其中八成人口是学生的巨大都市“学园都市”。学园都市的所有学生均会接受超能力开发，借由药物、催眠术与通电刺激等方式取得超能力。能力者以范围和威力...",
+      "totalEpisodes": 24,
+      "progress": "",
+      "rating": {
+        "score": 9.7,
+        "count": 61089
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "奇幻",
+        "校园",
+        "战斗",
+        "漫画改"
+      ],
+      "publish": {
+        "pubTime": "2009-10-02 00:00:00",
+        "pubTimeDisplay": "2009年10月02日00:00",
+        "releaseDate": "2009-10-02",
+        "releaseDateDisplay": "2009年10月2日"
+      },
+      "latestEpisode": {
+        "id": 84363,
+        "title": "24",
+        "longTitle": "亲爱的朋友",
+        "index": "全24话",
+        "pubTime": "2016-02-24 11:35:00"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss425"
+    },
+    {
+      "seasonId": 427,
+      "mediaId": 427,
+      "title": "某科学的超电磁炮S",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "http://i0.hdslb.com/bfs/bangumi/image/090d4aa97754d1d80206e461eb633b28b9deed07.jpg",
+      "evaluate": "《科学超电磁炮（とある科学の超电磁炮）》是以镰池和马所著作的轻小说《魔法禁书目录》的人气角色御坂美琴为主角所作的外传漫画，由冬川基作画，连载于月刊Comic电击大王，至2009年12月已经累计销售18...",
+      "totalEpisodes": 24,
+      "progress": "",
+      "rating": {
+        "score": 9.7,
+        "count": 37435
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "奇幻",
+        "科幻",
+        "校园",
+        "战斗"
+      ],
+      "publish": {
+        "pubTime": "2013-04-12 00:00:00",
+        "pubTimeDisplay": "2013年04月12日00:00",
+        "releaseDate": "2013-04-12",
+        "releaseDateDisplay": "2013年4月12日"
+      },
+      "latestEpisode": {
+        "id": 72043,
+        "title": "24",
+        "longTitle": "Eternal Party",
+        "index": "全24话",
+        "pubTime": "2015-10-01 13:24:40"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss427"
+    },
+    {
+      "seasonId": 80930,
+      "mediaId": 24491383,
+      "title": "那年那兔那些事儿 第七季",
+      "seasonType": 4,
+      "seasonTypeName": "国创",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "https://i0.hdslb.com/bfs/bangumi/image/3136f672b657d0a9eacd7a508d8a70f1967ca771.png",
+      "evaluate": "本季（第七季）以志愿军兔退伍老兵和后代的视角，讲述种花家制造业从无到有，从落后到追赶，最终形成完备的自有体系的故事。...",
+      "totalEpisodes": 12,
+      "progress": "",
+      "rating": {
+        "score": 9.4,
+        "count": 689
+      },
+      "areas": [
+        "中国大陆"
+      ],
+      "styles": [
+        "漫画改",
+        "萌系",
+        "泡面",
+        "历史"
+      ],
+      "publish": {
+        "pubTime": "2025-02-11 19:00:00",
+        "pubTimeDisplay": "02月11日19:00",
+        "releaseDate": "2025-02-11",
+        "releaseDateDisplay": "2025年2月11日"
+      },
+      "latestEpisode": {
+        "id": 1438464,
+        "title": "12",
+        "longTitle": "扬帆起航",
+        "index": "全12话",
+        "pubTime": "2025-07-15 19:00:01"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss80930"
+    },
+    {
+      "seasonId": 44818,
+      "mediaId": 20136738,
+      "title": "邻家的天使同学",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "https://i0.hdslb.com/bfs/bangumi/image/50f011dc86acb0f89bfb38384f9383a68a06bd78.png",
+      "evaluate": "高一学生藤宫周在升学后开始了他的独居生活。\n他所在的公寓隔壁，住着他们学校第一的美少女——椎名真昼。\n他们二人平时几乎没有交集。而一次大雨中，周把伞借给了浑身湿透的真昼。自此，二人便开始了奇妙的交流。...",
+      "totalEpisodes": 12,
+      "progress": "",
+      "rating": {
+        "score": 7.1,
+        "count": 7726
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "日常",
+        "治愈",
+        "校园",
+        "小说改"
+      ],
+      "publish": {
+        "pubTime": "2023-03-04 20:00:00",
+        "pubTimeDisplay": "2023年03月04日20:00",
+        "releaseDate": "2023-01-27",
+        "releaseDateDisplay": "2023年1月27日"
+      },
+      "latestEpisode": {
+        "id": 747743,
+        "title": "12",
+        "longTitle": "告别过去那个胆怯的自己",
+        "index": "全12话",
+        "pubTime": "2023-05-13 20:00:01"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss44818"
+    },
+    {
+      "seasonId": 32982,
+      "mediaId": 28228367,
+      "title": "辉夜大小姐想让我告白？～天才们的恋爱头脑战～",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "http://i0.hdslb.com/bfs/bangumi/image/83ad052250e9a803e4ebaa47bef971cb079e0543.png",
+      "evaluate": "秀才所聚集的名校·秀知院学园，在那里的学生会相遇的副会长·四宫辉夜与会长·白银御行，是任何人都认为适合对方的两个天才，原以为他们马上就能交往了，但他们因为自尊心超强一直没能告白！！在“如何让对方告白”...",
+      "totalEpisodes": 12,
+      "progress": "",
+      "rating": {
+        "score": 9.8,
+        "count": 216708
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "搞笑",
+        "校园",
+        "恋爱",
+        "漫画改"
+      ],
+      "publish": {
+        "pubTime": "2020-04-12 00:00:00",
+        "pubTimeDisplay": "2020年04月12日00:00",
+        "releaseDate": "2020-04-12",
+        "releaseDateDisplay": "2020年4月12日"
+      },
+      "latestEpisode": {
+        "id": 317936,
+        "title": "12",
+        "longTitle": "学生会想被拍/藤原千花想让它膨胀",
+        "index": "全12话",
+        "pubTime": "2020-06-28 00:00:00"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss32982"
+    },
+    {
+      "seasonId": 41411,
+      "mediaId": 28237120,
+      "title": "辉夜大小姐想让我告白 -究极浪漫-",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "http://i0.hdslb.com/bfs/bangumi/image/ffe6ebdf6770e7975bf830bee73a03c79e81b690.png",
+      "evaluate": "秀知院学园是秀才云集的菁英学校，在学生会中担任学生会副会长·四宫辉夜遇见了学生会长·白银御行。\n原以为这两个任谁都觉得很登对的天才应该很快就会在一起，但这两人却因为过高的自尊心导致他们终没能向对方告白...",
+      "totalEpisodes": 13,
+      "progress": "",
+      "rating": {
+        "score": 9.5,
+        "count": 51348
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "日常",
+        "搞笑",
+        "校园",
+        "恋爱",
+        "漫画改"
+      ],
+      "publish": {
+        "pubTime": "2022-04-29 00:00:00",
+        "pubTimeDisplay": "2022年04月29日00:00",
+        "releaseDate": "2022-04-29",
+        "releaseDateDisplay": "2022年4月29日"
+      },
+      "latestEpisode": {
+        "id": 562250,
+        "title": "13",
+        "longTitle": "「两个告白」后篇 | 秀知院后夜祭",
+        "index": "全13话",
+        "pubTime": "2022-07-15 00:30:00"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss41411"
+    },
+    {
+      "seasonId": 26274,
+      "mediaId": 5267730,
+      "title": "辉夜大小姐想让我告白～天才们的恋爱头脑战～",
+      "seasonType": 1,
+      "seasonTypeName": "番剧",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "http://i0.hdslb.com/bfs/bangumi/451037aabcdce0379752e087720673609894161a.png",
+      "evaluate": "家庭背景与人品都很棒！！一大群有前途的秀才所聚集的秀知院学园！！在那里的学生会相遇的副会长·四宫辉夜与会长·白银御行原本应该是彼此受到了对方吸引…但想不到都过半年了却仍然什么事情也没发生！！最麻烦的是...",
+      "totalEpisodes": 12,
+      "progress": "",
+      "rating": {
+        "score": 9.8,
+        "count": 237999
+      },
+      "areas": [
+        "日本"
+      ],
+      "styles": [
+        "日常",
+        "搞笑",
+        "校园",
+        "智斗",
+        "恋爱",
+        "漫画改"
+      ],
+      "publish": {
+        "pubTime": "2019-01-13 00:00:00",
+        "pubTimeDisplay": "2019年01月13日00:00",
+        "releaseDate": "2019-01-13",
+        "releaseDateDisplay": "2019年1月13日"
+      },
+      "latestEpisode": {
+        "id": 259781,
+        "title": "12",
+        "longTitle": "听不见烟花的声音 后篇/辉夜大小姐不想逃避",
+        "index": "全12话",
+        "pubTime": "2019-03-31 00:00:00"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss26274"
+    },
+    {
+      "seasonId": 26257,
+      "mediaId": 4315402,
+      "title": "三体",
+      "seasonType": 4,
+      "seasonTypeName": "国创",
+      "followStatus": {
+        "code": 3,
+        "label": "watching",
+        "labelZh": "在看"
+      },
+      "cover": "http://i0.hdslb.com/bfs/bangumi/image/9870f898b8a39bbb8048f34317f8d78a02cc1770.png",
+      "evaluate": "无数细线横亘在星空之中，如同一把巨大的刷子。三体星舰队将于400年后抵达。遥远蝴蝶扇动着翅膀，也改变了罗辑的命运，轰然打开的门后是世界中心——面壁计划开启。同时，智子所创建的破壁室内，破壁人一一就位…...",
+      "totalEpisodes": 15,
+      "progress": "",
+      "rating": {
+        "score": 8.2,
+        "count": 51802
+      },
+      "areas": [
+        "中国大陆"
+      ],
+      "styles": [],
+      "publish": {
+        "pubTime": "2022-12-10 11:00:00",
+        "pubTimeDisplay": "2022年12月10日11:00",
+        "releaseDate": "2022-12-10",
+        "releaseDateDisplay": "2022年12月10日"
+      },
+      "latestEpisode": {
+        "id": 705756,
+        "title": "15",
+        "longTitle": "永恒的篝火",
+        "index": "全15话",
+        "pubTime": "2023-03-25 11:00:00"
+      },
+      "url": "https://www.bilibili.com/bangumi/play/ss26257"
+    }
+  ]
+}

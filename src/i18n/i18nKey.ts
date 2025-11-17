@@ -35,6 +35,20 @@ enum I18nKey {
 	license = "license",
 	githubContributions = "githubContributions",
 	ongoingProjects = "ongoingProjects",
+	anime = "anime",
+	animeTitle = "animeTitle",
+	animeSubtitle = "animeSubtitle",
+	animeFilterAll = "animeFilterAll",
+	animeStatusWatching = "animeStatusWatching",
+	animeStatusCompleted = "animeStatusCompleted",
+	animeStatusPlanned = "animeStatusPlanned",
+	animeStatusOnHold = "animeStatusOnHold",
+	animeStatusDropped = "animeStatusDropped",
+	animeYear = "animeYear",
+	animeStudio = "animeStudio",
+	animeEmpty = "animeEmpty",
+	animeEmptyLocal = "animeEmptyLocal",
+	animeEmptyBangumi = "animeEmptyBangumi",
 }
 
 export default I18nKey;

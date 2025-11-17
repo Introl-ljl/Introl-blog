@@ -1,4 +1,5 @@
 import type {
+	AnimePageConfig,
 	ExpressiveCodeConfig,
 	LicenseConfig,
 	NavBarConfig,
@@ -54,9 +55,9 @@ export const navBarConfig: NavBarConfig = {
 			external: false, // 内部链接
 		},
 		{
-			name: "项目", // 项目页面链接
-			url: "/projects/", // 链接地址
-			external: false, // 内部链接
+			name: "追番", // 追番页面链接
+			url: "/anime/",
+			external: false,
 		},
 		{
 			name: "友链", // 友链页面链接
@@ -71,6 +72,15 @@ export const navBarConfig: NavBarConfig = {
 			external: true, // 是否为外部链接，在新标签页打开
 		},
 	],
+};
+
+export const animePageConfig: AnimePageConfig = {
+	enable: true, // 是否开启追番页面
+	mode: "remote", // "local" | "bangumi" | "remote"
+	bangumiUserId: "your-user-id", // Bangumi 模式需要手动填写
+	remoteEndpoint:
+		"http://localhost:8787/bangumi?vmid=1048480581&type=anime&status=watching", // 本地Docker服务
+	remoteStatuses: ["watching"], // 便于在 worker 端过滤状态
 };
 
 export const profileConfig: ProfileConfig = {

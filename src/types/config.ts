@@ -71,6 +71,14 @@ export type ProfileConfig = {
 	}[];
 };
 
+export type AnimePageConfig = {
+	enable: boolean;
+	mode: "bangumi" | "local" | "remote";
+	bangumiUserId: string;
+	remoteEndpoint?: string;
+	remoteStatuses?: string[];
+};
+
 export type LicenseConfig = {
 	enable: boolean;
 	name: string;
