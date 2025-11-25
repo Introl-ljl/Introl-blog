@@ -69,3 +69,7 @@ src/content/posts/.obsidian/app.json
 src/content/posts/.obsidian/appearance.json
 src/content/posts/.obsidian/core-plugins.json
 src/content/posts/.obsidian/workspace.json
+
+src/content/posts/.obsidian/
+src/content/posts/.smtcmp_json_db/
+src/content/posts/.smtcmp_vector_db.tar.gz
