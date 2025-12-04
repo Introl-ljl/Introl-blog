@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(pnpm audit:*)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm outdated:*)",
+      "Bash(npm install)",
+      "Bash(node index.js)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

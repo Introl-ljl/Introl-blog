@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "blog": {
+      "command": "node",
+      "args": ["C:/Users/LEGION/Desktop/blog/mcp-blog-server/index.js"],
+      "cwd": "C:/Users/LEGION/Desktop/blog/mcp-blog-server"
+    }
+  }
+}
