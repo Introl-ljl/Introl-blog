@@ -107,14 +107,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "git_push",
-      description: "推送到远程仓库",
-      inputSchema: {
-        type: "object",
-        properties: {
-          remote: { type: "string", description: "远程仓库名称", default: "origin" },
-          branch: { type: "string", description: "分支名称", default: "main" }
-        }
-      }
+      description: "推送到 blog-server main 分支",
+      inputSchema: { type: "object", properties: {} }
     }
   ]
 }));
@@ -206,11 +200,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return new Promise((resolve) => {
           const proc = spawn("pnpm", ["dev"], { cwd: BLOG_ROOT, shell: true });
           let output = "";
-          proc.stdout.on("data", (data) => { output += data.toString(); });
+          proc.stdout.on("data", (data) => {
+            output += data.toString();
+            const match = output.match(/Local:\s+(http:\/\/[^\s]+)/);
+            if (match) {
+              resolve({ content: [{ type: "text", text: `开发服务器已启动\n\n访问链接: ${match[1]}\n\n${output}` }] });
+            }
+          });
           proc.stderr.on("data", (data) => { output += data.toString(); });
           setTimeout(() => {
-            resolve({ content: [{ type: "text", text: `开发服务器已启动\n${output}` }] });
-          }, 3000);
+            if (!output.includes("Local:")) {
+              resolve({ content: [{ type: "text", text: `开发服务器已启动\n访问链接: http://localhost:4321\n\n${output}` }] });
+            }
+          }, 5000);
         });
       }
 
@@ -228,13 +230,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "git_push": {
-        const remote = args.remote || "origin";
-        const branch = args.branch || "main";
         try {
-          const { stdout, stderr } = await execAsync(`git push ${remote} ${branch}`, { cwd: BLOG_ROOT });
-          return { content: [{ type: "text", text: `推送成功\n${stdout}${stderr}` }] };
+          const { stdout, stderr } = await execAsync("git push blog-server main", { cwd: BLOG_ROOT });
+          return { content: [{ type: "text", text: `推送成功到 blog-server main\n${stdout}${stderr}` }] };
         } catch (error) {
-          return { content: [{ type: "text", text: `推送失败\n${error.message}` }], isError: true };
+          return { content: [{ type: "text", text: `推送失败\n${error.stdout || ""}${error.stderr || ""}${error.message}` }], isError: true };
         }
       }
 
