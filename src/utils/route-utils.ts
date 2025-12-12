@@ -133,13 +133,16 @@ export function buildRedirectUrl(targetRoute: Route, addRouteCheckedParam = fals
 	const currentSearch = window.location.search;
 	const currentHash = window.location.hash;
 
+	// 移除 URL 尾随斜杠，避免与 pathname 的前导斜杠重复
+	const baseUrl = targetRoute.url.replace(/\/+$/, '');
+
 	// 仅在自动跳转时添加 route_checked 参数防止循环跳转
 	if (addRouteCheckedParam) {
 		const separator = currentSearch ? "&" : "?";
-		return `${targetRoute.url}${currentPath}${currentSearch}${separator}route_checked=1${currentHash}`;
+		return `${baseUrl}${currentPath}${currentSearch}${separator}route_checked=1${currentHash}`;
 	}
 
-	return `${targetRoute.url}${currentPath}${currentSearch}${currentHash}`;
+	return `${baseUrl}${currentPath}${currentSearch}${currentHash}`;
 }
 
 /**
