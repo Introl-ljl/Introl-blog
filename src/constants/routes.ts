@@ -36,7 +36,7 @@ export const ROUTES: Route[] = [
 		id: "edgeone",
 		name: "EdgeOne",
 		description: "腾讯EdgeOne边缘加速",
-		url: "https://your-edgeone-domain.com", // 请替换为实际EdgeOne域名
+		url: "https://blogeo.introl.top", // 请替换为实际EdgeOne域名
 		testUrl: "/favicon.ico",
 		priority: 4,
 		protocol: "ipv4",
