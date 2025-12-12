@@ -108,3 +108,31 @@ export type BlogPostData = {
 export type ExpressiveCodeConfig = {
 	theme: string;
 };
+
+export type Route = {
+	id: string;
+	name: string;
+	description: string;
+	url: string;
+	testUrl: string;
+	priority: number;
+	protocol: "ipv4" | "ipv6";
+};
+
+export type RouteLatency = {
+	route: Route;
+	latency: number;
+	success: boolean;
+	timestamp: number;
+};
+
+export type RoutePreference = {
+	selectedRoute: string | null;
+	autoSwitch: boolean;
+	lastCheck: number;
+	latencyCache: Record<string, {
+		latency: number;
+		timestamp: number;
+		success: boolean;
+	}>;
+};

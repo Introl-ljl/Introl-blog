@@ -49,6 +49,20 @@ enum I18nKey {
 	animeEmpty = "animeEmpty",
 	animeEmptyLocal = "animeEmptyLocal",
 	animeEmptyBangumi = "animeEmptyBangumi",
+
+	// Route Selector
+	routeSelector = "routeSelector",
+	routeSelectorTitle = "routeSelectorTitle",
+	routeSelectorAutoSwitch = "routeSelectorAutoSwitch",
+	routeSelectorRefresh = "routeSelectorRefresh",
+	routeSelectorCurrent = "routeSelectorCurrent",
+	routeSelectorTesting = "routeSelectorTesting",
+	routeSelectorClickToSwitch = "routeSelectorClickToSwitch",
+	routeLatencyExcellent = "routeLatencyExcellent",
+	routeLatencyGood = "routeLatencyGood",
+	routeLatencyFair = "routeLatencyFair",
+	routeLatencySlow = "routeLatencySlow",
+	routeLatencyFailed = "routeLatencyFailed",
 }
 
 export default I18nKey;

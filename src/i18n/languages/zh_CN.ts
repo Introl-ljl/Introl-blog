@@ -52,4 +52,17 @@ export const zh_CN: Translation = {
 	[Key.animeEmpty]: "暂无追番数据",
 	[Key.animeEmptyLocal]: "请在 src/data/anime.ts 中添加番剧信息",
 	[Key.animeEmptyBangumi]: "请在配置中填写 Bangumi 用户 ID",
+
+	[Key.routeSelector]: "线路选择",
+	[Key.routeSelectorTitle]: "线路选择",
+	[Key.routeSelectorAutoSwitch]: "自动选择最优线路",
+	[Key.routeSelectorRefresh]: "刷新",
+	[Key.routeSelectorCurrent]: "当前",
+	[Key.routeSelectorTesting]: "检测中",
+	[Key.routeSelectorClickToSwitch]: "点击线路卡片切换访问节点",
+	[Key.routeLatencyExcellent]: "优秀",
+	[Key.routeLatencyGood]: "良好",
+	[Key.routeLatencyFair]: "一般",
+	[Key.routeLatencySlow]: "较慢",
+	[Key.routeLatencyFailed]: "失败",
 };

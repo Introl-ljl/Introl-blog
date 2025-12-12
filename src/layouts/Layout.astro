@@ -5,6 +5,7 @@ import "@fontsource/roboto/700.css";
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import PhotoSwipeInit from "../components/PhotoSwipeInit.svelte";
+import RouteAutoSwitch from "@components/RouteAutoSwitch.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
 	AUTO_MODE,
@@ -221,6 +222,7 @@ const ogImage = await (async () => {
 		  data-overlayscrollbars-initialize
 	>
 		<ConfigCarrier></ConfigCarrier>
+		<RouteAutoSwitch />
 		<div id="layout-root">
 			<slot />
 		</div>
