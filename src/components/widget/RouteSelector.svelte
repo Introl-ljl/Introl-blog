@@ -84,6 +84,10 @@ function toggleAutoSwitch() {
 
 function togglePanel() {
 	isOpen = !isOpen;
+	// 打开面板时自动刷新测试
+	if (isOpen && !isTesting) {
+		testLatencies();
+	}
 }
 
 function getLatencyText(latency: RouteLatency): string {
