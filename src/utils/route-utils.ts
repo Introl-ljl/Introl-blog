@@ -2,37 +2,73 @@ import type { Route, RouteLatency, RoutePreference } from "@/types/config";
 import { ROUTES, ROUTE_CONFIG } from "@constants/routes";
 
 /**
+ * 使用 Image 对象测试线路延迟（用于 HTTP 线路，绕过混合内容限制）
+ */
+function testWithImage(url: string, timeout: number): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const startTime = performance.now();
+		const img = new Image();
+		let timeoutId: number | undefined;
+
+		const cleanup = () => {
+			if (timeoutId) clearTimeout(timeoutId);
+			img.onload = null;
+			img.onerror = null;
+		};
+
+		timeoutId = window.setTimeout(() => {
+			cleanup();
+			reject(new Error("Timeout"));
+		}, timeout);
+
+		img.onload = () => {
+			cleanup();
+			resolve(Math.round(performance.now() - startTime));
+		};
+
+		img.onerror = () => {
+			cleanup();
+			// 对于 favicon，即使 onerror 也可能是成功的（CORS 限制）
+			// 只要有响应就算成功
+			resolve(Math.round(performance.now() - startTime));
+		};
+
+		img.src = url;
+	});
+}
+
+/**
  * 测试单个线路的延迟
  * @param route 要测试的线路
  * @returns 延迟测试结果
  */
 export async function testRouteLatency(route: Route): Promise<RouteLatency> {
 	const startTime = performance.now();
-	let timeoutId: number | undefined;
+	const testUrl = `${route.url}${route.testUrl}?_t=${Date.now()}`;
+	const isHttp = route.url.startsWith("http://");
 
 	try {
-		// 创建 AbortController 用于超时控制
-		const controller = new AbortController();
-		timeoutId = window.setTimeout(() => controller.abort(), ROUTE_CONFIG.TIMEOUT);
+		let latency: number;
 
-		// 使用 HEAD 请求测试（流量小）
-		// 添加时间戳避免缓存
-		const testUrl = `${route.url}${route.testUrl}?_t=${Date.now()}`;
+		if (isHttp) {
+			// HTTP 线路使用 Image 测试，绕过混合内容限制
+			latency = await testWithImage(testUrl, ROUTE_CONFIG.TIMEOUT);
+		} else {
+			// HTTPS 线路使用 fetch 测试
+			const controller = new AbortController();
+			const timeoutId = window.setTimeout(() => controller.abort(), ROUTE_CONFIG.TIMEOUT);
 
-		const response = await fetch(testUrl, {
-			method: "HEAD",
-			mode: "no-cors", // 允许跨域，但无法读取响应
-			cache: "no-store",
-			signal: controller.signal,
-		});
+			await fetch(testUrl, {
+				method: "HEAD",
+				mode: "no-cors",
+				cache: "no-store",
+				signal: controller.signal,
+			});
 
-		clearTimeout(timeoutId);
-		timeoutId = undefined;
-		const endTime = performance.now();
-		const latency = Math.round(endTime - startTime);
+			clearTimeout(timeoutId);
+			latency = Math.round(performance.now() - startTime);
+		}
 
-		// no-cors 模式下无法读取状态码，只能判断是否成功返回
-		// 如果请求被阻止或超时，会进入 catch 块
 		return {
 			route,
 			latency,
@@ -40,21 +76,10 @@ export async function testRouteLatency(route: Route): Promise<RouteLatency> {
 			timestamp: Date.now(),
 		};
 	} catch (error) {
-		// 确保清理 timeout
-		if (timeoutId !== undefined) {
-			clearTimeout(timeoutId);
-		}
-
 		const endTime = performance.now();
 		const latency = Math.round(endTime - startTime);
 
-		// 判断是否是超时错误
-		const isTimeout = error instanceof Error && error.name === "AbortError";
-		console.warn(`Route ${route.name} test failed:`, {
-			error,
-			isTimeout,
-			latency,
-		});
+		console.warn(`Route ${route.name} test failed:`, { error, latency });
 
 		return {
 			route,
