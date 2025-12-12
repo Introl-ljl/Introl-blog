@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(pnpm audit:*)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm outdated:*)",
+      "Bash(npm install)",
+      "Bash(node index.js)",
+      "Bash(cat:*)",
+      "Bash(git revert:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrevert: 回退剩余测试提交\n\n撤销以下测试提交的更改：\n- feat: add test post for git tools\n- feat: Test and verify blog functionalities\nEOF\n)\")",
+      "Bash(git stash:*)",
+      "Bash(git stash pop:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
