@@ -18,7 +18,7 @@ export const ROUTES: Route[] = [
 		id: "ipv4-cn",
 		name: "国内服务器",
 		description: "国内IPv4服务器节点，稳定快速",
-		url: "http://106.13.94.207:8080/", // 请替换为实际域名
+		url: "http://106.13.94.207:8080", // 请替换为实际域名
 		testUrl: "/favicon.ico",
 		priority: 2,
 		protocol: "ipv4",
