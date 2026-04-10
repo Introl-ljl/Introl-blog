@@ -1,0 +1,121 @@
+---
+// RouteAutoSwitch.astro - 自动线路切换组件
+// 在页面加载时检测最优线路并自动跳转
+---
+
+<script>
+import {
+	loadRoutePreference,
+	testAllRoutes,
+	selectBestRoute,
+	getCurrentRoute,
+	buildRedirectUrl,
+	isRouteCheckedInSession,
+	isRouteCheckedInUrl,
+	markRouteCheckedInSession,
+	updateLatencyCache,
+} from "@utils/route-utils";
+
+/**
+ * 自动切换到最优线路
+ * 仅在以下条件全部满足时执行：
+ * 1. 本次会话未检测过（防止循环跳转）
+ * 2. 用户启用了自动切换
+ * 3. 检测到更优的线路
+ */
+async function autoSwitchRoute() {
+	// 如果 URL 中有 route_checked 参数，立即移除它以避免影响后续访问
+	if (isRouteCheckedInUrl()) {
+		const url = new URL(window.location.href);
+		url.searchParams.delete("route_checked");
+		window.history.replaceState({}, "", url.toString());
+		console.info("[RouteAutoSwitch] Cleaned up route_checked param from URL");
+	}
+
+	// 检查是否已经检测过
+	if (isRouteCheckedInSession()) {
+		console.info("[RouteAutoSwitch] Already checked in this session, skipping");
+		return;
+	}
+
+	// 加载用户偏好
+	const preference = loadRoutePreference();
+
+	// 检查是否启用自动切换
+	if (!preference.autoSwitch) {
+		console.info("[RouteAutoSwitch] Auto-switch disabled, skipping");
+		// 注意：不标记为已检测，这样用户启用后可以立即生效
+		return;
+	}
+
+	try {
+		console.info("[RouteAutoSwitch] Testing all routes...");
+
+		// 测试所有线路
+		const results = await testAllRoutes();
+
+		// 更新缓存
+		updateLatencyCache(results);
+
+		// 检查用户是否手动选择过线路
+		let targetRoute = null;
+		if (preference.selectedRoute) {
+			// 用户有手动选择的偏好，检查该线路是否可用
+			const userSelectedResult = results.find(r => r.route.id === preference.selectedRoute);
+			if (userSelectedResult && userSelectedResult.success) {
+				// 用户选择的线路可用，优先使用用户选择
+				targetRoute = userSelectedResult.route;
+				console.info("[RouteAutoSwitch] Using user-selected route:", targetRoute.name);
+			} else {
+				console.warn("[RouteAutoSwitch] User-selected route unavailable, falling back to best route");
+			}
+		}
+
+		// 如果用户没有选择或选择的线路不可用，选择最优线路
+		if (!targetRoute) {
+			targetRoute = selectBestRoute(results);
+		}
+
+		if (!targetRoute) {
+			console.warn("[RouteAutoSwitch] No available route found, will retry on next page load");
+			// 不标记为已检测，允许下次页面加载时重试
+			return;
+		}
+
+		// 只有在成功找到可用线路后才标记为已检测
+		markRouteCheckedInSession();
+
+		// 获取当前线路
+		const currentRoute = getCurrentRoute();
+
+		console.info("[RouteAutoSwitch] Target route:", targetRoute.name, {
+			current: currentRoute?.id,
+			target: targetRoute.id,
+		});
+
+		// 如果目标线路不是当前线路，执行跳转
+		if (currentRoute?.id !== targetRoute.id) {
+			console.info(`[RouteAutoSwitch] Redirecting to ${targetRoute.name}...`);
+			// 自动跳转时添加 route_checked 参数防止循环
+			const redirectUrl = buildRedirectUrl(targetRoute, true);
+
+			// 延迟跳转，给用户一点反应时间
+			setTimeout(() => {
+				window.location.href = redirectUrl;
+			}, 500);
+		} else {
+			console.info("[RouteAutoSwitch] Already on the best route");
+		}
+	} catch (error) {
+		console.error("[RouteAutoSwitch] Failed to auto-switch route:", error);
+	}
+}
+
+// 在 DOM 加载完成后执行
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", autoSwitchRoute);
+} else {
+	// DOM 已经加载完成
+	autoSwitchRoute();
+}
+</script>

@@ -46,7 +46,7 @@ async function fetchLocalGitContributions() {
 
     const config = {
       repoPath: '.git', // Git目录路径
-      days: 12 * 7, // 12周
+      days: 52 * 7, // 52周（约一年）
       author: undefined // 获取所有作者的提交
     };
 
@@ -98,13 +98,13 @@ async function fetchProjectGitHubContributions(githubUrl: string) {
     const endSunday = new Date(endDate);
     endSunday.setDate(endDate.getDate() + (7 - endDateDay) % 7);
 
-    // 往前推12周到开始日期
+    // 往前推52周到开始日期
     const startDate = new Date(endSunday);
-    startDate.setDate(endSunday.getDate() - 12 * 7 + 1);
+    startDate.setDate(endSunday.getDate() - 52 * 7 + 1);
 
     const data = [];
 
-    for (let i = 0; i < 12 * 7; i++) {
+    for (let i = 0; i < 52 * 7; i++) {
       const date = new Date(startDate);
       date.setDate(startDate.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
@@ -147,13 +147,13 @@ function generateProjectTimelineData() {
   const endSunday = new Date(endDate);
   endSunday.setDate(endDate.getDate() + (7 - endDateDay) % 7);
 
-  // 往前推12周到开始日期
+  // 往前推52周到开始日期
   const startDate = new Date(endSunday);
-  startDate.setDate(endSunday.getDate() - 12 * 7 + 1);
+  startDate.setDate(endSunday.getDate() - 52 * 7 + 1);
 
   const data = [];
 
-  for (let i = 0; i < 12 * 7; i++) {
+  for (let i = 0; i < 52 * 7; i++) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
     const dateStr = date.toISOString().split('T')[0];
@@ -400,7 +400,7 @@ const startRow = firstDate.getDay();
           </div>
         ) : (
           <!-- 水平布局 -->
-          <div class="grid w-full" style="grid-template-columns: auto repeat(12, 1fr); grid-template-rows: auto repeat(7, 1fr); gap: 3px; max-width: 100%;">
+          <div class="grid w-full" style="grid-template-columns: auto repeat(52, 1fr); grid-template-rows: auto repeat(7, 1fr); gap: 3px; max-width: 100%;">
 
             <!-- 月份标签 -->
             {monthLabels.map((month: any) => (

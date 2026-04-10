@@ -52,4 +52,17 @@ export const en: Translation = {
 	[Key.animeEmpty]: "No anime data yet",
 	[Key.animeEmptyLocal]: "Add entries in src/data/anime.ts",
 	[Key.animeEmptyBangumi]: "Set your Bangumi user ID in the config",
+
+	[Key.routeSelector]: "Route Selector",
+	[Key.routeSelectorTitle]: "Route Selection",
+	[Key.routeSelectorAutoSwitch]: "Auto-select optimal route",
+	[Key.routeSelectorRefresh]: "Refresh",
+	[Key.routeSelectorCurrent]: "Current",
+	[Key.routeSelectorTesting]: "Testing",
+	[Key.routeSelectorClickToSwitch]: "Click route card to switch node",
+	[Key.routeLatencyExcellent]: "Excellent",
+	[Key.routeLatencyGood]: "Good",
+	[Key.routeLatencyFair]: "Fair",
+	[Key.routeLatencySlow]: "Slow",
+	[Key.routeLatencyFailed]: "Failed",
 };

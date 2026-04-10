@@ -73,3 +73,11 @@ src/content/posts/.obsidian/workspace.json
 src/content/posts/.obsidian/
 src/content/posts/.smtcmp_json_db/
 src/content/posts/.smtcmp_vector_db.tar.gz
+
+# Local deployment files
+.env.deploy
+.env.deploy.example
+DEPLOYMENT.md
+deploy.sh
+nginx/
+*.tar.gz
